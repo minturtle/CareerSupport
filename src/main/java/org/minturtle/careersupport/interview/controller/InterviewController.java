@@ -37,21 +37,47 @@ public class InterviewController {
     ){
         Flux<String> interviewQuestion = interviewService.getInterviewQuestion(templateId);
 
-        Mono<Void> saveToDatabase = interviewQuestion
-                .collectList()
-                .map(s -> String.join("", s))
-                .flatMap(c->interviewService.saveMessage(templateId, InterviewMessage.SenderType.INTERVIEWER, c));
+        Mono<Void> saveQuestion = onCompleteSaveMessage(
+                interviewQuestion,
+                templateId,
+                InterviewMessage.SenderType.INTERVIEWER
+        );
 
         return interviewQuestion
                 .publishOn(Schedulers.boundedElastic())
-                .doOnComplete(saveToDatabase::subscribe);
+                .doOnComplete(saveQuestion::subscribe);
     }
 
-    @PostMapping(value = "/process", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping(value = "/answer/{templateId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> doAIInterview(
-            @RequestParam String theme,
-            @RequestBody InterviewProcessRequest prev
+            @PathVariable String templateId,
+            @RequestBody InterviewProcessRequest reqBody
     ){
-        return interviewService.getFollowQuestion(theme, prev.getPreviousQuestion(), prev.getPreviousAnswer());
+        Flux<String> followQuestion = interviewService.getFollowQuestion(templateId, reqBody.getAnswer());
+
+        Mono<Void> saveQuestion = onCompleteSaveMessage(
+                followQuestion,
+                templateId,
+                InterviewMessage.SenderType.INTERVIEWER
+        );
+
+        Mono<Void> saveAnswer = onCompleteSaveMessage(
+                Flux.just(reqBody.getAnswer()),
+                templateId,
+                InterviewMessage.SenderType.USER
+        );
+
+        return followQuestion
+                .publishOn(Schedulers.boundedElastic())
+                .doOnComplete(() -> {
+                    saveAnswer.then(saveQuestion).subscribe();
+                });
+    }
+
+    private Mono<Void> onCompleteSaveMessage(Flux<String> message, String templateId, InterviewMessage.SenderType sender){
+        return message
+                .collectList()
+                .map(s -> String.join("", s))
+                .flatMap(c->interviewService.saveMessage(templateId, sender, c));
     }
 }

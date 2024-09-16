@@ -45,13 +45,20 @@ public class InterviewService {
     public Flux<String> getInterviewQuestion(String templateId){
         Mono<InterviewTemplate> templateMono = interviewTemplateRepository.findById(templateId);
 
-        return templateMono.flatMapMany(template -> {
-            return chatService.generate(interviewSystemMessage, template.getTheme());
-        });
+        return templateMono.flatMapMany(template ->
+                chatService.generate(interviewSystemMessage, template.getTheme())
+        );
     }
 
-    public Flux<String> getFollowQuestion(String theme, String previousQuestion, String previousAnswer){
-        return chatService.generate(followSystemMessage, List.of(previousQuestion, previousAnswer), theme);
+    public Flux<String> getFollowQuestion(String templateId, String answer){
+        return interviewMessageRepository.findFirstByTemplateIdAndSenderOrderByCreatedAtDesc(
+                templateId,
+                InterviewMessage.SenderType.INTERVIEWER
+        )
+            .map(InterviewMessage::getContent)
+            .flatMapMany(
+                previousQuestion->chatService.generate(followSystemMessage, List.of(previousQuestion, answer), templateId)
+            );
     }
 
     public Mono<Void> saveMessage(String templateId, InterviewMessage.SenderType sender, String content) {
