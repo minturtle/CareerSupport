@@ -37,7 +37,6 @@ public class UserController {
     @PostMapping("/login")
     public Mono<ResponseEntity<UserLoginResponse>> login(@RequestBody UserLoginRequest loginRequest) {
         return userService.login(loginRequest.getUsername(), loginRequest.getPassword())
-                .map(UserLoginResponse::new)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
     }

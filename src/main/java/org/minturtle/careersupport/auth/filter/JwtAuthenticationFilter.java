@@ -3,6 +3,7 @@ package org.minturtle.careersupport.auth.filter;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
+import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,8 @@ public class JwtAuthenticationFilter implements WebFilter {
         token = token.substring(7);
 
         try{
-            String userId = jwtUtil.verify(token);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, null);
+            UserInfoDto user = jwtUtil.verify(token);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, null);
 
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));

@@ -2,11 +2,13 @@ package org.minturtle.careersupport.user.dto;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.minturtle.careersupport.user.entity.User;
 
 @AllArgsConstructor
 @Getter
+@Builder
 public class UserInfoDto {
 
     private final String id;

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
 import org.minturtle.careersupport.common.exception.ConflictException;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
+import org.minturtle.careersupport.user.dto.UserLoginResponse;
 import org.minturtle.careersupport.user.dto.UserRegistrationRequest;
 import org.minturtle.careersupport.user.entity.User;
 import org.minturtle.careersupport.user.repository.UserRepository;
@@ -38,10 +39,14 @@ public class UserService {
 
 
 
-    public Mono<String> login(String username, String password) {
+    public Mono<UserLoginResponse> login(String username, String password) {
         return userRepository.findByUsername(username)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .map(user -> jwtTokenProvider.sign(user.getId(), new Date()))
+                .map(user -> createUserLoginResponse(user, jwtTokenProvider.sign(UserInfoDto.of(user), new Date())))
                 .switchIfEmpty(Mono.error(new RuntimeException("Invalid credentials")));
+    }
+
+    private UserLoginResponse createUserLoginResponse(User user, String jwt){
+        return new UserLoginResponse(user.getNickname(), jwt);
     }
 }
