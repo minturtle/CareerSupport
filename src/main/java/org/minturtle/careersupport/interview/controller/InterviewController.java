@@ -26,9 +26,8 @@ public class InterviewController {
             @RequestParam(required = true) String theme,
             @CurrentUser UserInfoDto userInfo
     ){
-        return Mono.just(new CreateInterviewTemplateResponse());
+        return interviewService.createTemplate(userInfo.getId(), theme);
     }
-
 
     @PostMapping(value = "/start", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> startAIInterview(
