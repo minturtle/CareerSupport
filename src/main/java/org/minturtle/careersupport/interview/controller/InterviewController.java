@@ -1,6 +1,7 @@
 package org.minturtle.careersupport.interview.controller;
 
 
+import org.minturtle.careersupport.common.dto.CursoredResponse;
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewProcessRequest;
@@ -38,14 +39,13 @@ public class InterviewController {
     }
 
     @GetMapping("/messages")
-    public Mono<List<InterviewMessageResponse>> getMessagesByTemplateId(
+    public Mono<CursoredResponse<InterviewMessageResponse>> getMessagesByTemplateId(
             @RequestParam String templateId,
             @RequestParam(required = false) String messageId,
             @RequestParam(defaultValue = "10") int size
     ) {
         return interviewService
-                .getMessagesByTemplateIdWithMessageIdCursor(templateId, messageId, size)
-                .collectList();
+                .getMessagesByTemplateIdWithMessageIdCursor(templateId, messageId, size);
     }
 
     @PostMapping("/new")

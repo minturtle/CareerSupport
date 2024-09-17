@@ -2,6 +2,7 @@ package org.minturtle.careersupport.interview.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.minturtle.careersupport.common.dto.CursoredResponse;
 import org.minturtle.careersupport.common.service.ChatService;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
@@ -42,8 +43,8 @@ public class InterviewService {
                 .map(InterviewTemplateResponse::of);
     }
 
-    public Flux<InterviewMessageResponse> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String messageId, int size) {
-        Pageable pageable = PageRequest.of(0, size);
+    public Mono<CursoredResponse<InterviewMessageResponse>> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String messageId, int size) {
+        Pageable pageable = PageRequest.of(0, size + 1);
 
         Flux<InterviewMessage> messagesFlux;
         if (messageId == null || messageId.isEmpty()) {
@@ -51,15 +52,23 @@ public class InterviewService {
                     .findTopNByTemplateIdOrderByIdDesc(templateId, pageable);
         } else {
             messagesFlux = interviewMessageRepository
-                    .findByTemplateIdAndIdLessThanOrderByIdDesc(templateId, messageId, pageable);
+                    .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, messageId, pageable);
         }
 
         return messagesFlux
                 .map(InterviewMessageResponse::of)
                 .collectList()
-                .flatMapMany(list -> {
+                .map(list -> {
+                    String cursor = null;
+                    if (list.size() > size) {
+                        cursor = list.get(size).getId();
+                        list = list.subList(0, size);
+                    }
                     Collections.reverse(list);
-                    return Flux.fromIterable(list);
+                    return CursoredResponse.<InterviewMessageResponse>builder()
+                            .cursor(cursor)
+                            .data(list)
+                            .build();
                 });
     }
 
