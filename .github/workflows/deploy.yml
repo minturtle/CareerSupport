@@ -7,92 +7,83 @@ on:
 
 jobs:
   build:
-    name: Build and Push jar
+    name: Build Spring Boot Application
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 17 (for building the Spring Boot application)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 3. Add execution permission for the Gradle wrapper
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 4. Build the Spring Boot application using Gradle
       - name: Build with Gradle
-        run: ./gradlew build -x test  # Skip tests to speed up the build process
+        run: ./gradlew build -x test
 
-      # 5. Upload the JAR as a build artifact
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v3
         with:
           name: careersupport-jar
           path: build/libs/*.jar
+
   docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: build
-
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Download the JAR artifact from the build step
-      - name: Download JAR artifact
+      - name: Download and rename JAR artifact
         uses: actions/download-artifact@v3
         with:
           name: careersupport-jar
+          path: app
 
-      # 3. Set up Docker Buildx
+      - name: Rename JAR file
+        run: |
+          find app -name "careersupport-*.jar" -type f -exec mv {} app/app.jar \;
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 4. Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # 5. Build Docker image using the downloaded JAR
-      - name: Build Docker image
-        run: |
-          docker build -t minturtle/careersupport:latest .
-
-      # 6. Push Docker image to Docker Hub
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push minturtle/careersupport:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: minturtle/careersupport:latest
 
   deploy:
     name: Deploy to GCE via SSH
     runs-on: ubuntu-latest
     needs: docker
-
     steps:
-      # 1. Checkout the repository (to get docker-compose.yml)
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up SSH
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
-      # 3. Deploy to GCE
       - name: Deploy to Google Compute Engine
+        env:
+          GCE_USER: ${{ secrets.GCE_USER }}
+          GCE_HOST: ${{ secrets.GCE_HOST }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.GCE_USER }}@${{ secrets.GCE_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no $GCE_USER@$GCE_HOST << 'EOF'
             cd /home/ubuntu
             sudo docker-compose pull
             sudo docker-compose up -d
