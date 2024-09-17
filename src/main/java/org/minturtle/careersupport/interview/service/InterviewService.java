@@ -96,7 +96,7 @@ public class InterviewService {
         )
             .map(InterviewMessage::getContent)
             .flatMapMany(
-                previousQuestion->chatService.generate(followSystemMessage, List.of(previousQuestion, answer), templateId)
+                previousQuestion->chatService.generate(followSystemMessage, List.of(previousQuestion), answer)
             );
     }
 
