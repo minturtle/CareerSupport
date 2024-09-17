@@ -67,4 +67,15 @@ jobs:
 
       # 2. Set up SSH
       - name: Set up SSH
-        uses:
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
+
+      # 3. Deploy to GCE
+      - name: Deploy to Google Compute Engine
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCE_USER }}@${{ secrets.GCE_HOST }} << 'EOF'
+            cd /home/ubuntu
+            sudo docker-compose pull
+            sudo docker-compose up -d
+          EOF
