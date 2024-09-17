@@ -3,6 +3,7 @@ package org.minturtle.careersupport.interview.service;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.common.service.ChatService;
+import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
 import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository;
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
@@ -11,6 +12,7 @@ import org.minturtle.careersupport.interview.entity.InterviewTemplate;
 import org.minturtle.careersupport.interview.repository.InterviewMessageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,6 +39,21 @@ public class InterviewService {
         return interviewTemplateRepository
                 .findByUserId(userId, PageRequest.of(page, size))
                 .map(InterviewTemplateResponse::of);
+    }
+
+    public Flux<InterviewMessageResponse> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String messageId, int size) {
+        Pageable pageable = PageRequest.of(0, size);
+
+        if (messageId == null || messageId.isEmpty()) {
+            return interviewMessageRepository
+                    .findByTemplateIdOrderByIdDesc(templateId, pageable)
+                    .map(InterviewMessageResponse::of);
+        }
+
+        return interviewMessageRepository
+                .findByTemplateIdAndIdLessThanOrderByIdDesc(templateId, messageId, pageable)
+                .map(InterviewMessageResponse::of);
+
     }
 
     public Mono<CreateInterviewTemplateResponse> createTemplate(
