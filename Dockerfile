@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-alpine
 WORKDIR /app
 
 # 3. Copy the current directory contents into the container at /app
-COPY build/libs/careersupport-*.jar /app/careersupport.jar
+COPY target/careersupport-*.jar /app/careersupport.jar
 
 # 4. Make port 8080 available to the world outside this container
 EXPOSE 8080
