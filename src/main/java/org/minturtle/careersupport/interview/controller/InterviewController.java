@@ -3,6 +3,7 @@ package org.minturtle.careersupport.interview.controller;
 
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
 import org.minturtle.careersupport.interview.dto.InterviewProcessRequest;
+import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
 import org.minturtle.careersupport.interview.entity.InterviewMessage;
 import org.minturtle.careersupport.interview.service.InterviewService;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
@@ -13,6 +14,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/interview")
 public class InterviewController {
@@ -21,6 +24,16 @@ public class InterviewController {
 
     public InterviewController(InterviewService interviewService) {
         this.interviewService = interviewService;
+    }
+
+    @GetMapping("/templates")
+    public Mono<List<InterviewTemplateResponse>> getTemplatesByUserId(
+            @CurrentUser UserInfoDto userInfo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return interviewService
+                .getTemplatesByUserId(userInfo.getId(), page, size)
+                .collectList();
     }
 
     @PostMapping("/new")

@@ -3,12 +3,14 @@ package org.minturtle.careersupport.interview.service;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.common.service.ChatService;
-import org.minturtle.careersupport.interview.InterviewTemplateRepository;
+import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
+import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository;
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
 import org.minturtle.careersupport.interview.entity.InterviewMessage;
 import org.minturtle.careersupport.interview.entity.InterviewTemplate;
 import org.minturtle.careersupport.interview.repository.InterviewMessageRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +33,11 @@ public class InterviewService {
     @Value("${spring.ai.openai.messages.follow-system-message}")
     private String followSystemMessage;
 
-
+    public Flux<InterviewTemplateResponse> getTemplatesByUserId(String userId, int page, int size) {
+        return interviewTemplateRepository
+                .findByUserId(userId, PageRequest.of(page, size))
+                .map(InterviewTemplateResponse::of);
+    }
 
     public Mono<CreateInterviewTemplateResponse> createTemplate(
             String userId, String theme
