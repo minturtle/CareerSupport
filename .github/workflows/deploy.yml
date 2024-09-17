@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build and Push Docker Image
+    name: Build and Push jar
     runs-on: ubuntu-latest
 
     steps:
@@ -35,8 +35,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: careersupport-jar
-          path: target/careersupport-*.jar
-
+          path: build/libs/*.jar
   docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
