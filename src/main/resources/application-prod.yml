@@ -1,0 +1,20 @@
+spring:
+  data:
+    mongodb:
+      uri: MONGODB_URI
+  ai:
+    openai:
+      base-url: OPENAI_BASE_URI
+      api-key: OPENAI_API_KEY
+      chat:
+        options:
+          model: OPENAI_MODEL
+          temperature: 0.5
+      messages:
+        interview-system-message: OPENAI_INTERVIEW_MESSAGE
+        follow-system-message: OPENAI_FOLLOW_MESSAGE
+cors:
+  origins: SYSTEM_CORS
+jwt:
+  secret: JWT_SECRET
+  access-token-expire-time: JWT_EXPIRY_TIME
