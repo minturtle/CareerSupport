@@ -19,30 +19,34 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'  # Use the Temurin distribution of OpenJDK
+          distribution: 'temurin'
           java-version: '17'
 
-      # 3. Build the Spring Boot application (Gradle or Maven)
-      - name: Build with Gradle
-        run: ./gradlew build -x test
+      # 3. Add execution permission for the Gradle wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-      # 4. Set up Docker Buildx
+      # 4. Build the Spring Boot application using Gradle
+      - name: Build with Gradle
+        run: ./gradlew build -x test  # Skip tests to speed up the build process
+
+      # 5. Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 5. Log in to Docker Hub
+      # 6. Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Docker Hub username in GitHub Secrets
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}  # Docker Hub access token in GitHub Secrets
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # 6. Build Docker image
+      # 7. Build Docker image
       - name: Build Docker image
         run: |
           docker build -t minturtle/careersupport:latest .
 
-      # 7. Push Docker image to Docker Hub
+      # 8. Push Docker image to Docker Hub
       - name: Push Docker image to Docker Hub
         run: |
           docker push minturtle/careersupport:latest
@@ -61,13 +65,13 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}  # SSH private key stored in GitHub Secrets
+          ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
       # 3. Deploy to GCE
       - name: Deploy to Google Compute Engine
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCE_USER }}@${{ secrets.GCE_HOST }} << 'EOF'
             cd /home/ubuntu
-            sudo docker-compose pull  # Pull the latest Docker image
-            sudo docker-compose up -d  # Run Docker Compose in detached mode
+            sudo docker-compose pull
+            sudo docker-compose up -d
           EOF
