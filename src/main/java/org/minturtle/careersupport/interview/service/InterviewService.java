@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -44,16 +45,22 @@ public class InterviewService {
     public Flux<InterviewMessageResponse> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String messageId, int size) {
         Pageable pageable = PageRequest.of(0, size);
 
+        Flux<InterviewMessage> messagesFlux;
         if (messageId == null || messageId.isEmpty()) {
-            return interviewMessageRepository
-                    .findByTemplateIdOrderByIdDesc(templateId, pageable)
-                    .map(InterviewMessageResponse::of);
+            messagesFlux = interviewMessageRepository
+                    .findTopNByTemplateIdOrderByIdDesc(templateId, pageable);
+        } else {
+            messagesFlux = interviewMessageRepository
+                    .findByTemplateIdAndIdLessThanOrderByIdDesc(templateId, messageId, pageable);
         }
 
-        return interviewMessageRepository
-                .findByTemplateIdAndIdLessThanOrderByIdDesc(templateId, messageId, pageable)
-                .map(InterviewMessageResponse::of);
-
+        return messagesFlux
+                .map(InterviewMessageResponse::of)
+                .collectList()
+                .flatMapMany(list -> {
+                    Collections.reverse(list);
+                    return Flux.fromIterable(list);
+                });
     }
 
     public Mono<CreateInterviewTemplateResponse> createTemplate(

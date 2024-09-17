@@ -14,5 +14,5 @@ public interface InterviewMessageRepository extends ReactiveMongoRepository<Inte
 
     Flux<InterviewMessage> findByTemplateIdAndIdLessThanOrderByIdDesc(String templateId, String messageId, Pageable pageable);
 
-    Flux<InterviewMessage> findByTemplateIdOrderByIdDesc(String templateId, Pageable pageable);
+    Flux<InterviewMessage> findTopNByTemplateIdOrderByIdDesc(String templateId, Pageable pageable);
 }
