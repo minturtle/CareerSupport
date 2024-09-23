@@ -3,10 +3,8 @@ package org.minturtle.careersupport.interview.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.minturtle.careersupport.common.dto.CursoredResponse;
+import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
 import org.minturtle.careersupport.interview.entity.InterviewMessage;
@@ -21,7 +19,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -219,6 +216,43 @@ class InterviewControllerTest extends IntegrationTest {
                 .containsExactlyElementsOf(
                         interviewMessages.subList(0, 1).stream().map(InterviewMessageResponse::of).toList()
                 );
+    }
+
+    @Test
+    @DisplayName("사용자는 새로운 면접 주제를 생성할 수 있다.")
+    public void testUserCreateNewInterviewTemplate() throws Exception{
+        //given
+        String theme = "Java Programming";
+        String userId = "123";
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+
+        User user = new User(userId, nickname, username, password);
+
+        userRepository.save(user).block();
+
+        //when
+        String jwtToken = createJwtToken(user);
+
+        CreateInterviewTemplateResponse actual = webTestClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/interview/new")
+                        .queryParam("theme", theme)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CreateInterviewTemplateResponse.class)
+                .returnResult().getResponseBody();
+
+        //then
+        InterviewTemplate savedInterviewTemplate = interviewTemplateRepository.findById(actual.getInterviewId()).block();
+
+        assertThat(savedInterviewTemplate.getUserId()).isEqualTo(user.getId());
+        assertThat(savedInterviewTemplate.getTheme()).isEqualTo(theme);
+        assertThat(actual.getTheme()).isEqualTo(theme);
+
     }
 
 }
