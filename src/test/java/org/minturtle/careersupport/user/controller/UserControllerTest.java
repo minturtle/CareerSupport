@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 class UserControllerTest extends IntegrationTest {
-
     @Autowired
     private UserRepository userRepository;
 
