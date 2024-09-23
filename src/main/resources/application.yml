@@ -1,6 +1,10 @@
 spring:
-  application:
-    name=career-support
-  config:
-    activate:
-      on-profile: dev
+  profiles:
+    active: prod
+
+
+---
+
+spring:
+  profiles:
+    active: dev

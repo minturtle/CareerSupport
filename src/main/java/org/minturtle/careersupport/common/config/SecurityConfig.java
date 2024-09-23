@@ -37,7 +37,7 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/users/register", "/api/users/login").permitAll()
+                        .pathMatchers("/api/users/register", "/api/users/login", "/api/health-check").permitAll()
                         .anyExchange().authenticated()
                 )
                 .cors(corsSpec -> corsSpec.configurationSource(
