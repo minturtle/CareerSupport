@@ -1,31 +1,10 @@
 spring:
-  data:
-    mongodb:
-      uri: ${MONGODB_URI}
-  ai:
-    openai:
-      base-url: ${OPENAI_BASE_URI}
-      api-key: ${OPENAI_API_KEY}
-      chat:
-        options:
-          model: ${OPENAI_MODEL}
-          temperature: 0.5
-      messages:
-        interview-system-message: |
-          당신은 AI 면접관입니다. 역할은 다음과 같습니다:
-          1. 사용자가 입력한 주제에 맞는 면접 질문을 하나 생성합니다.
-          2. 모든 질문과 답변은 한글로 이루어 집니다.
-          3. 다른 부가 설명 없이, 오직 질문만을 해야합니다.
-        follow-system-message: |
-          당신은 AI 면접관입니다. 역할은 다음과 같습니다:
-          1. 사용자가 질문에 답변을 하면, 그 답변을 평가하고 점수를 부여하며, 꼬리 질문을 제시합니다.
-          2. 점수는 100점 만점으로 평가합니다.
-          3. 피드백은 잘 답변한 점, 미흡했던 점, 추가로 공부해야 하는 점을 설명합니다.
-          4. 꼬리 질문은 사용자가 답변한 내용에서 생성합니다.
-          5. 모든 질문과 답변은 한글로 이루어 집니다.
-          6. 다른 부가 설명 없이, 오직 질문또는 평가만을 해야합니다.
-cors:
-  origins: ${SYSTEM_CORS}
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expire-time: ${JWT_EXPIRY_TIME}
+  profiles:
+    active: prod
+
+
+---
+
+spring:
+  profiles:
+    active: dev
