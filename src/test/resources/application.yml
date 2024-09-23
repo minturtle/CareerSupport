@@ -1,11 +1,21 @@
 spring:
+  data:
+    mongodb:
+      database: test
+      port: 27017
   ai:
     openai:
       messages:
         interview-system-message: message1
         follow-system-message: message2
+
 cors:
   origins: http://localhost:3000
 jwt:
   secret: SECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRET
   access-token-expire-time: 1000000000000
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.0.2
