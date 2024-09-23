@@ -11,4 +11,4 @@ COPY app/app.jar app.jar
 EXPOSE 8080
 
 # 5. Run the Spring Boot application
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","-XX:+AllowRedefinitionToAddDeleteMethods","/app/app.jar"]
