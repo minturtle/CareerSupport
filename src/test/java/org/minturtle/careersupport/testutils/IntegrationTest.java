@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.time.Instant;
 import java.util.Date;
 
 @SpringBootTest
@@ -35,6 +36,10 @@ public abstract class IntegrationTest {
 
     protected String createJwtToken(User user){
         return jwtTokenProvider.sign(UserInfoDto.of(user), new Date()).block();
+    }
+
+    protected String createExpiredToken(User user){
+        return jwtTokenProvider.sign(UserInfoDto.of(user), new Date(0)).block();
     }
 
 }

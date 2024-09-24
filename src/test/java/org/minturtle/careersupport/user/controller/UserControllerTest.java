@@ -151,6 +151,29 @@ class UserControllerTest extends IntegrationTest {
         assertThat(actual.getNickname()).isEqualTo(nickname);
     }
 
+    @Test
+    @DisplayName("만료된 JWT를 전달한 사용자는 401 오류를 throw한다")
+    public void testInvalidJWTToken401() throws Exception{
+        //given
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+
+        User user = new User("123", nickname, username, passwordEncoder.encode(password));
+        userRepository.save(user).block();
+
+        //when & then
+        String expiredToken = createExpiredToken(user);
+
+        webTestClient.get()
+                .uri("/api/users/info")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredToken)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+
+    }
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll().block();
@@ -164,4 +187,5 @@ class UserControllerTest extends IntegrationTest {
                 Arguments.of("username", "password", "user", "pwd")
         );
     }
+
 }
