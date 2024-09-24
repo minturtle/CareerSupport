@@ -6,6 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -60,18 +62,18 @@ public class JwtTokenProvider {
      * @param : String Token - 해독하려는 토큰
      * @return : 해독된 토큰의 uid
      */
-    public UserInfoDto verify(String token) {
-        Claims payload = Jwts.parser().verifyWith(key).build()
-                .parseSignedClaims(token).getPayload();
+    public Mono<UserInfoDto> verify(String token) {
+        return Mono.fromCallable(() -> {
+            Claims payload = Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(token).getPayload();
 
-
-        return UserInfoDto.builder()
-                .id(payload.getSubject())
-                .nickname(payload.get(USER_NICKNAME_CLAIM_NAME, String.class))
-                .username(payload.get(USER_USERNAME_CLAIM_NAME, String.class))
-                .build();
+            return UserInfoDto.builder()
+                    .id(payload.getSubject())
+                    .nickname(payload.get(USER_NICKNAME_CLAIM_NAME, String.class))
+                    .username(payload.get(USER_USERNAME_CLAIM_NAME, String.class))
+                    .build();
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
 
 }
-

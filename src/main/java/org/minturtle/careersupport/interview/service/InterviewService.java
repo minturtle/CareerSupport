@@ -2,7 +2,6 @@ package org.minturtle.careersupport.interview.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.minturtle.careersupport.common.dto.CursoredResponse;
 import org.minturtle.careersupport.common.service.ChatService;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -43,33 +41,20 @@ public class InterviewService {
                 .map(InterviewTemplateResponse::of);
     }
 
-    public Mono<CursoredResponse<InterviewMessageResponse>> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String messageId, int size) {
-        Pageable pageable = PageRequest.of(0, size + 1);
+    public Flux<InterviewMessageResponse> getMessagesByTemplateIdWithMessageIdCursor(String templateId, String cursor, int size) {
+        Pageable pageable = PageRequest.of(0, size);
 
         Flux<InterviewMessage> messagesFlux;
-        if (messageId == null || messageId.isEmpty()) {
+        if (cursor == null || cursor.isEmpty()) {
             messagesFlux = interviewMessageRepository
                     .findTopNByTemplateIdOrderByIdDesc(templateId, pageable);
         } else {
             messagesFlux = interviewMessageRepository
-                    .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, messageId, pageable);
+                    .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable);
         }
 
         return messagesFlux
-                .map(InterviewMessageResponse::of)
-                .collectList()
-                .map(list -> {
-                    String cursor = null;
-                    if (list.size() > size) {
-                        cursor = list.get(size).getId();
-                        list = list.subList(0, size);
-                    }
-                    Collections.reverse(list);
-                    return CursoredResponse.<InterviewMessageResponse>builder()
-                            .cursor(cursor)
-                            .data(list)
-                            .build();
-                });
+                .map(InterviewMessageResponse::of);
     }
 
     public Mono<CreateInterviewTemplateResponse> createTemplate(

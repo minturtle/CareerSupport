@@ -14,8 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -45,7 +45,21 @@ public class InterviewController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return interviewService
-                .getMessagesByTemplateIdWithMessageIdCursor(templateId, messageId, size);
+                .getMessagesByTemplateIdWithMessageIdCursor(templateId, messageId, size+1)
+                .collectList()
+                .map(list -> {
+                    String nextCursor = null;
+                    if (list.size() > size) {
+                        nextCursor = list.get(size).getId();
+                        list.remove(size);
+                    }
+
+                    Collections.reverse(list);
+                    return CursoredResponse.<InterviewMessageResponse>builder()
+                            .cursor(nextCursor)
+                            .data(list)
+                            .build();
+                });
     }
 
     @PostMapping("/new")
@@ -60,7 +74,7 @@ public class InterviewController {
     public Flux<String> startAIInterview(
             @PathVariable String templateId
     ){
-        Flux<String> interviewQuestion = interviewService.getInterviewQuestion(templateId);
+        Flux<String> interviewQuestion = interviewService.getInterviewQuestion(templateId).cache();
 
         Mono<Void> saveQuestion = onCompleteSaveMessage(
                 interviewQuestion,
@@ -69,7 +83,6 @@ public class InterviewController {
         );
 
         return interviewQuestion
-                .publishOn(Schedulers.boundedElastic())
                 .doOnComplete(saveQuestion::subscribe);
     }
 
@@ -93,9 +106,8 @@ public class InterviewController {
         );
 
         return followQuestion
-                .publishOn(Schedulers.boundedElastic())
                 .doOnComplete(() -> {
-                    saveAnswer.then(saveQuestion).subscribe();
+                    saveAnswer.then(saveQuestion);
                 });
     }
 

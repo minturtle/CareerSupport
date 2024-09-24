@@ -27,16 +27,13 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
         token = token.substring(7);
+        final String finalToken = token;
 
-        try{
-            UserInfoDto user = jwtUtil.verify(token);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, null);
-
-            return chain.filter(exchange)
-                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
-        }catch (JwtException e){
-            return chain.filter(exchange);
-        }
-
+        return Mono.justOrEmpty(finalToken)
+                .flatMap(jwtUtil::verify)
+                .map(user -> new UsernamePasswordAuthenticationToken(user, null, null))
+                .flatMap(auth -> chain.filter(exchange)
+                        .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth)))
+                .onErrorResume(JwtException.class, e -> chain.filter(exchange));
     }
 }

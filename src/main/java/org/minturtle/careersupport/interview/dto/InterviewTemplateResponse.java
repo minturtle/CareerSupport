@@ -6,8 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import org.minturtle.careersupport.interview.entity.InterviewTemplate;
 
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
@@ -26,4 +28,19 @@ public class InterviewTemplateResponse {
                 .build();
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InterviewTemplateResponse that = (InterviewTemplateResponse) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(theme, that.theme) &&
+                Objects.equals(createdAt.toEpochSecond(), that.createdAt.toEpochSecond());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, theme, createdAt.toEpochSecond());
+    }
 }
