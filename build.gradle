@@ -43,6 +43,7 @@ dependencies {
 
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0'
+	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 }
@@ -55,4 +56,8 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+test {
+	jvmArgs '-XX:+AllowRedefinitionToAddDeleteMethods' // blockhound test용
 }
