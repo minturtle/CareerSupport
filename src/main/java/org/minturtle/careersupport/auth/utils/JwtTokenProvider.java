@@ -41,17 +41,19 @@ public class JwtTokenProvider {
      * @param : now : token을 생성하는 시간
      * @return : 엑세스 토큰 리턴
      */
-    public String sign(UserInfoDto user, Date now) {
-        Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
+    public Mono<String> sign(UserInfoDto user, Date now) {
+        return Mono.fromCallable(() -> {
+            Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
 
-        return Jwts.builder()
-                .subject(user.getId())
-                .claim(USER_USERNAME_CLAIM_NAME, user.getUsername())
-                .claim(USER_NICKNAME_CLAIM_NAME, user.getNickname())
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(key)
-                .compact();
+            return Jwts.builder()
+                    .subject(user.getId())
+                    .claim(USER_USERNAME_CLAIM_NAME, user.getUsername())
+                    .claim(USER_NICKNAME_CLAIM_NAME, user.getNickname())
+                    .issuedAt(now)
+                    .expiration(expiryDate)
+                    .signWith(key)
+                    .compact();
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     /**
