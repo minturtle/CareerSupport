@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.minturtle.careersupport.common.dto.CursoredResponse;
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
+import org.minturtle.careersupport.interview.dto.InterviewProcessRequest;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
 import org.minturtle.careersupport.interview.entity.InterviewMessage;
 import org.minturtle.careersupport.interview.entity.InterviewTemplate;
@@ -309,6 +310,60 @@ class InterviewControllerTest extends IntegrationTest {
         Flux<InterviewMessage> messages = interviewMessageRepository.findAll();
 
         messages.collectList().subscribe(li->assertThat(li.size()).isEqualTo(1));
+    }
+
+    @Test
+    @DisplayName("사용자는 생성된 면접 질문에 대해 답변을 하고, 피드백을 받을 수 있다.")
+    public void testUserAnswerAndGetFeedback() throws Exception{
+        //given
+        String theme = "Java Programming";
+        String templateId = "template001";
+        String userId = "123";
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+        Flux<String> mockFollowQuestions = Flux.just("다음 질문", ":", "당신의 나이는?");
+        String prevQuestionContent = "질문 : 당신의 이름은?";
+
+        User user = new User(userId, nickname, username, password);
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme(theme).build();
+
+        InterviewMessage prevQuestion = InterviewMessage.builder()
+                .id("message1")
+                .templateId(templateId)
+                .sender(InterviewMessage.SenderType.INTERVIEWER)
+                .content(prevQuestionContent)
+                .build();
+
+        userRepository.save(user).block();
+        interviewTemplateRepository.save(interviewTemplate).block();
+        interviewMessageRepository.save(prevQuestion).block();
+
+        given(chatService.generate(anyString(), eq(List.of(prevQuestionContent)), anyString())).willReturn(mockFollowQuestions);
+
+        //when
+        String jwtToken = createJwtToken(user);
+        String userAnswer = "제 이름은 김민석 입니다.";
+        InterviewProcessRequest request = new InterviewProcessRequest(userAnswer);
+
+        Flux<String> actual = webTestClient.post()
+                .uri("/api/interview/answer/{templateId}", templateId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .bodyValue(request)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class)
+                .getResponseBody();
+        //then
+        StepVerifier.create(actual)
+                .expectNext("다음 질문")
+                .expectNext(":")
+                .expectNext("당신의 나이는?")
+                .verifyComplete();
+
+        verify(chatService, times(1)).generate(anyString(), eq(List.of(prevQuestionContent)), eq(userAnswer));
     }
 
 }
