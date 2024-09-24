@@ -7,13 +7,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.minturtle.careersupport.testutils.IntegrationTest;
-import org.minturtle.careersupport.user.dto.UserInfoDto;
-import org.minturtle.careersupport.user.dto.UserLoginRequest;
-import org.minturtle.careersupport.user.dto.UserLoginResponse;
-import org.minturtle.careersupport.user.dto.UserRegistrationRequest;
+import org.minturtle.careersupport.user.dto.*;
 import org.minturtle.careersupport.user.entity.User;
 import org.minturtle.careersupport.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -127,6 +125,55 @@ class UserControllerTest extends IntegrationTest {
 
     }
 
+
+    @Test
+    @DisplayName("JWT 토큰을 가진 사용자는 자신의 토큰으로 자신의 정보를 조회할 수 있다.")
+    public void testVerifyToken() throws Exception{
+        //given
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+
+        User user = new User("123", nickname, username, passwordEncoder.encode(password));
+        userRepository.save(user).block();
+
+        //when
+        String jwtToken = createJwtToken(user);
+        UserInfoResponse actual = webTestClient.get()
+                .uri("/api/users/info")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserInfoResponse.class)
+                .returnResult()
+                .getResponseBody();
+        //then
+        assertThat(actual.getNickname()).isEqualTo(nickname);
+    }
+
+    @Test
+    @DisplayName("만료된 JWT를 전달한 사용자는 401 오류를 throw한다")
+    public void testInvalidJWTToken401() throws Exception{
+        //given
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+
+        User user = new User("123", nickname, username, passwordEncoder.encode(password));
+        userRepository.save(user).block();
+
+        //when & then
+        String expiredToken = createExpiredToken(user);
+
+        webTestClient.get()
+                .uri("/api/users/info")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredToken)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+
+    }
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll().block();
@@ -140,4 +187,5 @@ class UserControllerTest extends IntegrationTest {
                 Arguments.of("username", "password", "user", "pwd")
         );
     }
+
 }

@@ -6,6 +6,7 @@ import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
 import org.minturtle.careersupport.common.exception.ConflictException;
 import org.minturtle.careersupport.common.exception.UnAuthorizedException;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
+import org.minturtle.careersupport.user.dto.UserInfoResponse;
 import org.minturtle.careersupport.user.dto.UserLoginResponse;
 import org.minturtle.careersupport.user.dto.UserRegistrationRequest;
 import org.minturtle.careersupport.user.entity.User;
@@ -46,6 +47,11 @@ public class UserService {
                 .flatMap(user -> jwtTokenProvider.sign(UserInfoDto.of(user), new Date())
                         .map(token -> createUserLoginResponse(user, token)))
                 .switchIfEmpty(Mono.error(new UnAuthorizedException("Invalid credentials")));
+    }
+
+    public Mono<UserInfoResponse> getUserInfo(String token){
+        return jwtTokenProvider.verify(token)
+                .map(UserInfoResponse::of);
     }
 
     private UserLoginResponse createUserLoginResponse(User user, String jwt){
