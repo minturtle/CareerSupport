@@ -17,11 +17,18 @@ import org.minturtle.careersupport.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 class InterviewControllerTest extends IntegrationTest {
@@ -253,6 +260,55 @@ class InterviewControllerTest extends IntegrationTest {
         assertThat(savedInterviewTemplate.getTheme()).isEqualTo(theme);
         assertThat(actual.getTheme()).isEqualTo(theme);
 
+    }
+
+    @Test
+    @DisplayName("사용자는 면접 주제에 대해 새로운 면접 질문을 생성할 수 있다.")
+    public void testUserCreateNewInterviewQuestion() throws Exception{
+        //given
+        String theme = "Java Programming";
+        String templateId = "template001";
+        String userId = "123";
+        String nickname = "nickname";
+        String username = "username";
+        String password = "password";
+        Flux<String> mockQuestions = Flux.just("질문", ":", "당신의 이름은?");
+
+        User user = new User(userId, nickname, username, password);
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme(theme).build();
+
+        given(chatService.generate(anyString(), eq(theme)))
+                .willReturn(mockQuestions);
+
+        userRepository.save(user).block();
+        interviewTemplateRepository.save(interviewTemplate).block();
+
+        //when
+        String jwtToken = createJwtToken(user);
+
+        Flux<String> resultFlux = webTestClient.post()
+                .uri("/api/interview/start/{templateId}", templateId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class)
+                .getResponseBody();
+
+
+        //then
+        StepVerifier.create(resultFlux)
+                .expectNext("질문")
+                .expectNext(":")
+                .expectNext("당신의 이름은?")
+                .verifyComplete();
+
+        verify(chatService, times(1))
+                .generate(anyString(), eq(theme));
+
+        Flux<InterviewMessage> messages = interviewMessageRepository.findAll();
+
+        messages.collectList().subscribe(li->assertThat(li.size()).isEqualTo(1));
     }
 
 }
