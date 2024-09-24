@@ -34,7 +34,7 @@ public abstract class IntegrationTest {
 
 
     protected String createJwtToken(User user){
-        return jwtTokenProvider.sign(UserInfoDto.of(user), new Date());
+        return jwtTokenProvider.sign(UserInfoDto.of(user), new Date()).block();
     }
 
 }
