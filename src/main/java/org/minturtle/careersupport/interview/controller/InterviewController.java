@@ -91,7 +91,7 @@ public class InterviewController {
             @PathVariable String templateId,
             @RequestBody InterviewProcessRequest reqBody
     ){
-        Flux<String> followQuestion = interviewService.getFollowQuestion(templateId, reqBody.getAnswer());
+        Flux<String> followQuestion = interviewService.getFollowQuestion(templateId, reqBody.getAnswer()).cache();
 
         Mono<Void> saveQuestion = onCompleteSaveMessage(
                 followQuestion,
@@ -107,7 +107,9 @@ public class InterviewController {
 
         return followQuestion
                 .doOnComplete(() -> {
-                    saveAnswer.then(saveQuestion);
+                    saveAnswer
+                            .then(saveQuestion)
+                            .subscribe();
                 });
     }
 

@@ -307,9 +307,10 @@ class InterviewControllerTest extends IntegrationTest {
         verify(chatService, times(1))
                 .generate(anyString(), eq(theme));
 
-        Flux<InterviewMessage> messages = interviewMessageRepository.findAll();
-
-        messages.collectList().subscribe(li->assertThat(li.size()).isEqualTo(1));
+        StepVerifier.create(interviewMessageRepository.findAll())
+                .assertNext(message->{
+                    assertThat(message.getContent()).isEqualTo("질문:당신의 이름은?");
+                });
     }
 
     @Test
@@ -364,6 +365,12 @@ class InterviewControllerTest extends IntegrationTest {
                 .verifyComplete();
 
         verify(chatService, times(1)).generate(anyString(), eq(List.of(prevQuestionContent)), eq(userAnswer));
+        StepVerifier.create(interviewMessageRepository.findAll()
+                        .filter(m -> m.getSender() == InterviewMessage.SenderType.USER))
+                .assertNext(message -> {
+                    assertThat(message.getContent()).isEqualTo("제 이름은 김민석 입니다.");
+                })
+                .verifyComplete();
     }
 
 }
