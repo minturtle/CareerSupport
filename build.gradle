@@ -45,6 +45,7 @@ dependencies {
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0'
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 }
 
