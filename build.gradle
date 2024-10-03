@@ -32,6 +32,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	implementation 'com.google.cloud:google-cloud-logging-logback:0.131.10-alpha'
 
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt:0.12.6'
@@ -39,12 +42,12 @@ dependencies {
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
 
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0'
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 }
 
 dependencyManagement {
