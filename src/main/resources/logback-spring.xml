@@ -1,0 +1,26 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%level] [%thread] [%logger{36}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
+        <log>careersupport</log>
+        <resourceType>gce_instance</resourceType>
+        <enhancer>com.google.cloud.logging.LoggingEnhancer</enhancer>
+    </appender>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="CLOUD" />
+        </root>
+    </springProfile>
+</configuration>
