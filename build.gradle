@@ -45,6 +45,7 @@ dependencies {
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 }
 
 dependencyManagement {
