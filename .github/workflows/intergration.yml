@@ -4,7 +4,8 @@ on:
   - pull_request
 
 jobs:
-  intergration:
+  integration:
+    name: Integration test
     runs-on: ubuntu-latest
     permissions:
       contents: read
