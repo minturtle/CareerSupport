@@ -3,6 +3,7 @@ package org.minturtle.careersupport.auth.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.minturtle.careersupport.common.aop.Logging;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,7 @@ public class JwtTokenProvider {
      * @param : now : token을 생성하는 시간
      * @return : 엑세스 토큰 리턴
      */
+    @Logging
     public Mono<String> sign(UserInfoDto user, Date now) {
         return Mono.fromCallable(() -> {
             Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);

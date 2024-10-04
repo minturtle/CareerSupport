@@ -3,6 +3,7 @@ package org.minturtle.careersupport.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
+import org.minturtle.careersupport.common.aop.Logging;
 import org.minturtle.careersupport.common.exception.ConflictException;
 import org.minturtle.careersupport.common.exception.UnAuthorizedException;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
@@ -19,6 +20,7 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
+@Logging
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
