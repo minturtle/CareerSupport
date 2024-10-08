@@ -15,6 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.stream.Stream;
 
@@ -176,7 +178,11 @@ class UserControllerTest extends IntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll().block();
+        StepVerifier.create(
+                Mono.when(
+                        userRepository.deleteAll()
+                )
+        ).verifyComplete();
     }
 
 

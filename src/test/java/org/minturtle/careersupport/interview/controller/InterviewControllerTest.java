@@ -20,6 +20,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -46,9 +47,13 @@ class InterviewControllerTest extends IntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll().block();
-        interviewTemplateRepository.deleteAll().block();
-        interviewMessageRepository.deleteAll().block();
+        StepVerifier.create(
+                Mono.when(
+                        userRepository.deleteAll(),
+                        interviewTemplateRepository.deleteAll(),
+                        interviewMessageRepository.deleteAll()
+                )
+        ).verifyComplete();
     }
 
     @Test
