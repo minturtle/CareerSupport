@@ -28,6 +28,12 @@ class UserControllerTest extends IntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll().block();
+    }
+
     @Test
     @DisplayName("사용자는 아직 회원가입 되지 않은 Username과 Password로 회원가입을 할 수 있다.")
     void registerUserSuccess() {
@@ -176,14 +182,6 @@ class UserControllerTest extends IntegrationTest {
 
     }
 
-    @BeforeEach
-    void setUp() {
-        StepVerifier.create(
-                Mono.when(
-                        userRepository.deleteAll()
-                )
-        ).verifyComplete();
-    }
 
 
     protected static Stream<Arguments> getLoginTestArguments(){

@@ -1,8 +1,7 @@
 spring:
   data:
     mongodb:
-      database: test
-      port: 27017
+      uri: mongodb://localhost:27018/test?maxPoolSize=30&minPoolSize=20&maxIdleTimeMS=60000&maxLifeTimeMS=300000
   ai:
     openai:
       messages:
