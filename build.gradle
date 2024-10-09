@@ -48,6 +48,8 @@ dependencies {
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0'
 	testImplementation 'org.junit.platform:junit-platform-launcher:1.11.2'
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
+	implementation 'com.google.auto.service:auto-service:1.1.1'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
