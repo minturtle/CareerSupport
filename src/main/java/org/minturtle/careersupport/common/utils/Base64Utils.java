@@ -1,8 +1,11 @@
 package org.minturtle.careersupport.common.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@Component
 public class Base64Utils {
 
 
