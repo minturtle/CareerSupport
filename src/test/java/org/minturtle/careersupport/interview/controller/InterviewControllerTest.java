@@ -47,13 +47,9 @@ class InterviewControllerTest extends IntegrationTest {
 
     @BeforeEach
     void setUp() {
-        StepVerifier.create(
-                Mono.when(
-                        userRepository.deleteAll(),
-                        interviewTemplateRepository.deleteAll(),
-                        interviewMessageRepository.deleteAll()
-                )
-        ).verifyComplete();
+        userRepository.deleteAll().block();
+        interviewTemplateRepository.deleteAll().block();
+        interviewMessageRepository.deleteAll().block();
     }
 
     @Test
