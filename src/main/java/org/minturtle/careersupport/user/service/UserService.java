@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +31,16 @@ public class UserService {
         return userRepository.findByUsername(registrationDto.getUsername())
                 .flatMap(existingUser -> Mono.error(new ConflictException("Username already exists")))
                 .switchIfEmpty(Mono.defer(() -> {
-                    User user = User.builder()
-                            .nickname(registrationDto.getNickname())
-                            .username(registrationDto.getUsername())
-                            .password(passwordEncoder.encode(registrationDto.getPassword()))
-                            .build();
-                    return userRepository.save(user);
+                    return Mono.fromCallable(() -> passwordEncoder.encode(registrationDto.getPassword()))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .flatMap(encodedPassword -> {
+                                User user = User.builder()
+                                        .nickname(registrationDto.getNickname())
+                                        .username(registrationDto.getUsername())
+                                        .password(encodedPassword)
+                                        .build();
+                                return userRepository.save(user);
+                            });
                 }))
                 .map(UserInfoDto::of)
                 .cast(UserInfoDto.class);
