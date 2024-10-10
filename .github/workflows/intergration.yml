@@ -37,7 +37,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build with Gradle
-        run: ./gradlew build -x test -i
+        run: ./gradlew build -x test
 
       - name: Test with Gradle
         run: ./gradlew test
