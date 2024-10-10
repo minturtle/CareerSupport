@@ -15,6 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.stream.Stream;
 
@@ -25,6 +27,12 @@ class UserControllerTest extends IntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll().block();
+    }
 
     @Test
     @DisplayName("사용자는 아직 회원가입 되지 않은 Username과 Password로 회원가입을 할 수 있다.")
@@ -174,10 +182,6 @@ class UserControllerTest extends IntegrationTest {
 
     }
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll().block();
-    }
 
 
     protected static Stream<Arguments> getLoginTestArguments(){
