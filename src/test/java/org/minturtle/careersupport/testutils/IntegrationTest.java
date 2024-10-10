@@ -7,6 +7,7 @@ import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
+import org.minturtle.careersupport.codereview.service.CodeReviewService;
 import org.minturtle.careersupport.common.service.ChatService;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
@@ -40,6 +41,10 @@ public abstract class IntegrationTest {
 
     @MockBean
     protected ChatService chatService;
+
+    // TODO : 추후 실제 빈으로 변경
+    @MockBean
+    protected CodeReviewService codeReviewService;
 
     protected String createJwtToken(User user){
         return jwtTokenProvider.sign(UserInfoDto.of(user), new Date()).block();
