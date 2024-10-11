@@ -25,10 +25,6 @@ class UserControllerTest extends IntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-
     @BeforeEach
     void setUp() {
         userRepository.deleteAll().block();
@@ -66,13 +62,14 @@ class UserControllerTest extends IntegrationTest {
     @DisplayName("사용자는 이미 회원가입 된 username을 입력할 시 409 코드를 반환받는다.")
     void registerUserDuplication() {
         //given
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
+        User user = createUser();
+        userRepository.save(user).block();
 
-
-        userRepository.save(new User("123", "nick", username, password)).block();
-        UserRegistrationRequest request = new UserRegistrationRequest(nickname, username, password);
+        UserRegistrationRequest request = new UserRegistrationRequest(
+                user.getNickname(),
+                user.getUsername(),
+                DEFAULT_USER_RAW_PASSWORD
+        );
 
         //when & then
         webTestClient.post()
@@ -87,14 +84,11 @@ class UserControllerTest extends IntegrationTest {
     @DisplayName("회원가입이 완료된 사용자는 로그인을 수행해 JWT 토큰을 반환받을 수 있다.")
     public void loginUserSuccess() throws Exception{
         //given
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
-
-        userRepository.save(new User("123", nickname, username, passwordEncoder.encode(password))).block();
+        User user = createUser();
+        userRepository.save(user).block();
 
         //when
-        UserLoginRequest request = new UserLoginRequest(username, password);
+        UserLoginRequest request = new UserLoginRequest(user.getUsername(), DEFAULT_USER_RAW_PASSWORD);
         UserLoginResponse actual = webTestClient.post()
                 .uri("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +99,7 @@ class UserControllerTest extends IntegrationTest {
                 .returnResult()
                 .getResponseBody();
         //then
-        assertThat(actual.getNickname()).isEqualTo(nickname);
+        assertThat(actual.getNickname()).isEqualTo(user.getNickname());
         assertThat(actual.getToken()).isNotNull();
     }
 
@@ -115,12 +109,13 @@ class UserControllerTest extends IntegrationTest {
     @DisplayName("잘못된 Username 또는 Password를 입력할 시 401 코드를 반환받는다")
     public void loginInvalidUsername(
             String correctUsername,
-            String correntPassword,
+            String correctPassword,
             String inputUsername,
             String inputPassword
     ) throws Exception{
         //given
-        userRepository.save(new User("123", "nickname", correctUsername, passwordEncoder.encode(correntPassword))).block();
+        User user = createUser(correctUsername, correctPassword);
+        userRepository.save(user).block();
 
         //when & then
         UserLoginRequest request = new UserLoginRequest(inputUsername, inputPassword);
@@ -138,11 +133,7 @@ class UserControllerTest extends IntegrationTest {
     @DisplayName("JWT 토큰을 가진 사용자는 자신의 토큰으로 자신의 정보를 조회할 수 있다.")
     public void testVerifyToken() throws Exception{
         //given
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
-
-        User user = new User("123", nickname, username, passwordEncoder.encode(password));
+        User user = createUser();
         userRepository.save(user).block();
 
         //when
@@ -156,18 +147,14 @@ class UserControllerTest extends IntegrationTest {
                 .returnResult()
                 .getResponseBody();
         //then
-        assertThat(actual.getNickname()).isEqualTo(nickname);
+        assertThat(actual.getNickname()).isEqualTo(user.getNickname());
     }
 
     @Test
     @DisplayName("만료된 JWT를 전달한 사용자는 401 오류를 throw한다")
     public void testInvalidJWTToken401() throws Exception{
         //given
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
-
-        User user = new User("123", nickname, username, passwordEncoder.encode(password));
+        User user = createUser();
         userRepository.save(user).block();
 
         //when & then
@@ -181,7 +168,6 @@ class UserControllerTest extends IntegrationTest {
 
 
     }
-
 
 
     protected static Stream<Arguments> getLoginTestArguments(){

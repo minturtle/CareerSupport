@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -37,6 +38,9 @@ public abstract class IntegrationTest {
     protected WebTestClient webTestClient;
 
     @Autowired
+    protected PasswordEncoder passwordEncoder;
+
+    @Autowired
     protected JwtTokenProvider jwtTokenProvider;
 
     @MockBean
@@ -45,6 +49,18 @@ public abstract class IntegrationTest {
     // TODO : 추후 실제 빈으로 변경
     @MockBean
     protected CodeReviewService codeReviewService;
+
+    protected static final String DEFAULT_USER_RAW_PASSWORD = "password";
+    protected User createUser(){
+        return createUser("username", DEFAULT_USER_RAW_PASSWORD);
+    }
+
+    protected User createUser(String username, String password){
+        String nickname = "nickname";
+
+        return new User("123", nickname, username, passwordEncoder.encode(password));
+
+    }
 
     protected String createJwtToken(User user){
         return jwtTokenProvider.sign(UserInfoDto.of(user), new Date()).block();
