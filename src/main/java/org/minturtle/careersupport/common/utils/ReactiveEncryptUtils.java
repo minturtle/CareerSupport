@@ -20,29 +20,24 @@ import java.util.Base64;
 public class ReactiveEncryptUtils {
 
     private final SecretKey secretKey;
-    private final String algorithm;
-    private final int ivLength;
-    private final int tagLength;
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 16;
+
+    private static final String ALGORITHM = "AES/GCM/NoPadding";
 
     public ReactiveEncryptUtils(
-            @Value("${spring.encryption.key}") String encryptionKey,
-            @Value("${spring.encryption.algorithm}") String algorithm,
-            @Value("${spring.encryption.key.iv-length}") int ivLength,
-            @Value("${spring.encryption.key.tag-length}") int tagLength
+            @Value("${spring.encryption.key}") String encryptionKey
     ) {
         this.secretKey = new SecretKeySpec(Base64.getDecoder().decode(encryptionKey), "AES");
-        this.algorithm = algorithm;
-        this.ivLength = ivLength;
-        this.tagLength = tagLength;
     }
 
     public Mono<String> encrypt(String data) {
         return Mono.fromCallable(() -> {
-            byte[] iv = new byte[ivLength];
+            byte[] iv = new byte[GCM_IV_LENGTH];
             new SecureRandom().nextBytes(iv);
 
-            Cipher cipher = Cipher.getInstance(algorithm);
-            GCMParameterSpec parameterSpec = new GCMParameterSpec(tagLength * 8, iv);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
 
             byte[] encryptedData = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
@@ -59,13 +54,13 @@ public class ReactiveEncryptUtils {
             byte[] decodedData = Base64.getDecoder().decode(encryptedData);
 
             ByteBuffer byteBuffer = ByteBuffer.wrap(decodedData);
-            byte[] iv = new byte[ivLength];
+            byte[] iv = new byte[GCM_IV_LENGTH];
             byteBuffer.get(iv);
             byte[] cipherText = new byte[byteBuffer.remaining()];
             byteBuffer.get(cipherText);
 
-            Cipher cipher = Cipher.getInstance(algorithm);
-            GCMParameterSpec parameterSpec = new GCMParameterSpec(tagLength * 8, iv);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
 
             byte[] decryptedData = cipher.doFinal(cipherText);

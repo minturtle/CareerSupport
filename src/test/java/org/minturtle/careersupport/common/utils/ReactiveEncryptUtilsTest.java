@@ -11,10 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReactiveEncryptUtilsTest {
 
     private final ReactiveEncryptUtils encryptUtils = new ReactiveEncryptUtils(
-            "X1XnwJ2Vrdw9wqdfX0rOdLfNJ8rwrvB9",
-            "AES/GCM/NoPadding",
-            12,
-            16
+            "X1XnwJ2Vrdw9wqdfX0rOdLfNJ8rwrvB9"
     );
 
     private final String testData = "Hello, World!";
