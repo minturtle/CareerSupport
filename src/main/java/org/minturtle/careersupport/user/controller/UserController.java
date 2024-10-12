@@ -6,9 +6,11 @@ import org.minturtle.careersupport.common.exception.BadRequestException;
 import org.minturtle.careersupport.common.exception.ConflictException;
 import org.minturtle.careersupport.common.exception.UnAuthorizedException;
 import org.minturtle.careersupport.user.dto.*;
+import org.minturtle.careersupport.user.resolvers.annotations.CurrentUser;
 import org.minturtle.careersupport.user.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -42,5 +44,14 @@ public class UserController {
         return userService.getUserInfo(token)
                 .onErrorResume(e->{ throw new UnAuthorizedException(e.getMessage());})
                 .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/api-token")
+    public Mono<ResponseEntity<UserApiAccessTokenResponse>> getUserApiToken(
+            @CurrentUser UserInfoDto user
+    ){
+        return userService.getUserApiAccessToken(user.getId()).map(
+                token -> ResponseEntity.status(HttpStatusCode.valueOf(201)).body(token)
+        );
     }
 }

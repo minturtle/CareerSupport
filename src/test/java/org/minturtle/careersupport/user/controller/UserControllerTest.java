@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.testutils.IntegrationTest;
 import org.minturtle.careersupport.user.dto.*;
 import org.minturtle.careersupport.user.entity.User;
@@ -22,8 +23,12 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 class UserControllerTest extends IntegrationTest {
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ApiTokenProvider apiTokenProvider;
 
     @BeforeEach
     void setUp() {
@@ -169,6 +174,32 @@ class UserControllerTest extends IntegrationTest {
 
     }
 
+    @Test
+    @DisplayName("사용자는 API AccessToken을 발급 받을 수 있다.")
+    public void testAcquireApiAccessToken() throws Exception{
+        //given
+        User user = createUser();
+        userRepository.save(user).block();
+
+        //when
+        String jwtToken = createJwtToken(user);
+        UserApiAccessTokenResponse responseBody = webTestClient.get()
+                .uri("/api/users/api-token")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(UserApiAccessTokenResponse.class)
+                .returnResult()
+                .getResponseBody();
+        //then
+        StepVerifier.create(userRepository.findById(user.getId()))
+                        .assertNext(savedUser->assertThat(savedUser.getApiToken()).isEqualTo(responseBody.token()))
+                                .verifyComplete();
+
+        StepVerifier.create(apiTokenProvider.decryptApiToken(responseBody.token()))
+                .assertNext(decrypted -> assertThat(decrypted).isEqualTo(UserInfoDto.of(user)))
+                .verifyComplete();
+    }
 
     protected static Stream<Arguments> getLoginTestArguments(){
         return Stream.of(
