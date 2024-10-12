@@ -6,6 +6,7 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
 import org.minturtle.careersupport.codereview.service.CodeReviewService;
 import org.minturtle.careersupport.common.service.ChatService;
@@ -42,6 +43,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     protected JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    protected ApiTokenProvider apiTokenProvider;
 
     @MockBean
     protected ChatService chatService;
