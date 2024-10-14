@@ -58,7 +58,6 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(apiTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/api/code-review"))
                 .build();
     }
 }

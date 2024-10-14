@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.testutils.IntegrationTest;
+import org.minturtle.careersupport.user.dto.UserInfoDto;
+import org.minturtle.careersupport.user.entity.User;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
@@ -24,6 +26,9 @@ class CodeReviewControllerTest extends IntegrationTest {
     @DisplayName("Code Review에 필요한 Request Body를 코드리뷰를 요청할 수 있다.")
     void testCodeReviewApiCall() throws Exception{
         // given
+        User user = createUser();
+        String apiToken = apiTokenProvider.generate(UserInfoDto.of(user)).block();
+
         CodeReviewRequest codeReviewRequestBody = CodeReviewRequest.builder()
                 .repositoryName("minturtle/careersupport")
                 .prNumber(1L)
@@ -39,6 +44,7 @@ class CodeReviewControllerTest extends IntegrationTest {
         // when & then
         webTestClient.post()
                 .uri("/api/code-review")
+                .header("X-API-TOKEN", apiToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(codeReviewRequestBody)
                 .exchange()

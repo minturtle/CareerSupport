@@ -7,6 +7,8 @@ spring:
       messages:
         interview-system-message: message1
         follow-system-message: message2
+  encryption:
+    key: gwIYgK2kSV3RM7FT3ORbNUm3Mp0lWalD
 
 cors:
   origins: http://localhost:3000
