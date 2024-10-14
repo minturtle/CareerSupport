@@ -24,6 +24,9 @@ spring:
           4. 꼬리 질문은 사용자가 답변한 내용에서 생성합니다.
           5. 모든 질문과 답변은 한글로 이루어 집니다.
           6. 다른 부가 설명 없이, 오직 질문또는 평가만을 해야합니다.
+
+  encryption:
+    key: ${SPRING_ENCRYPTION_KEY}
 cors:
   origins: ${SYSTEM_CORS}
 jwt:

@@ -21,7 +21,7 @@ public class AiCodeReviewClientImpl implements AiCodeReviewClient{
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
 
-    @Value("${spring.ai.openai.messages,code-review-system-message}")
+    @Value("${spring.ai.openai.messages.code-review-system-message}")
     private String codeReviewSystemMessage;
 
     @Override
@@ -33,7 +33,7 @@ public class AiCodeReviewClientImpl implements AiCodeReviewClient{
                                 .collect(Collectors.joining())
                                 .map(result -> new ReviewResponse(file.getFileName(), result));
                     } catch (JsonProcessingException e) {
-                        throw new InternalServerException("댓글 생성 중 오류가 발생했습니다.");
+                        throw new InternalServerException("답변 생성 중 오류가 발생했습니다.");
                     }
                 }
         );
