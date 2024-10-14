@@ -1,10 +1,7 @@
 package org.minturtle.careersupport.codereview.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Map;
 
@@ -12,10 +9,9 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public final class CodeReviewRequest {
-
+    private String githubToken;
     private String repositoryName;
     private Long prNumber;
-    private Map<String, String> fileContents;
-
 }
