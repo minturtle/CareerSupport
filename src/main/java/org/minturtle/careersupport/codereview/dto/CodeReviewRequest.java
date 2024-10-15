@@ -13,9 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public final class CodeReviewRequest {
-
+    private String githubToken;
     private String repositoryName;
     private Long prNumber;
-    private Map<String, String> fileContents;
-
 }
