@@ -10,8 +10,8 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
-import org.minturtle.careersupport.codereview.dto.github.request.ReviewComment;
-import org.minturtle.careersupport.codereview.dto.github.response.PullRequestFile;
+import org.minturtle.careersupport.codereview.service.AiCodeReviewClient.ReviewRequest;
+import org.minturtle.careersupport.codereview.service.AiCodeReviewClient.ReviewResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,7 +36,7 @@ public class GithubCodeReviewService implements CodeReviewService {
                 .flatMapMany(files -> {
                     try {
                         return Flux.fromIterable(files.toList().stream()
-                                        .map(PullRequestFile::from)
+                                        .map(ReviewRequest::from)
                                         .toList());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -55,13 +55,13 @@ public class GithubCodeReviewService implements CodeReviewService {
 
 
     private Mono<Void> postCommentsToPullRequest(String token, String repositoryName, Long prNumber,
-                                                 List<ReviewComment> reviewComments) {
+                                                 List<ReviewResponse> reviewComments) {
         return Mono.fromCallable(() -> getPullRequest(token, repositoryName, prNumber))
                 .publishOn(Schedulers.boundedElastic())
                 .flatMapMany(pullRequest -> Flux.fromIterable(reviewComments)
                         .flatMap(comment -> Mono.fromCallable(
                                         () -> pullRequest.createReview()
-                                                .singleLineComment(comment.getBody(), comment.getPath(), comment.getLine())
+                                                .singleLineComment(comment.getReviewContent(), comment.getFileName(), 1)
                                                 .event(GHPullRequestReviewEvent.COMMENT)
                                                 .create()
                                         )
