@@ -22,7 +22,8 @@ class CodeReviewControllerTest extends IntegrationTest {
     @DisplayName("Code Review에 필요한 Request Body를 코드리뷰를 요청할 수 있다.")
     void testCodeReviewApiCall() throws Exception{
         // given
-        String apiToken = "token";
+        User user = createUser();
+        String apiToken = apiTokenProvider.generate(UserInfoDto.of(user)).block();
         String ghpToken = "ghp_asdasdsaf21321";
         String repositoryName = "minturtle/careersupport";
         long prNumber = 1L;
@@ -48,6 +49,13 @@ class CodeReviewControllerTest extends IntegrationTest {
 
         // TODO : 추후에 실제 빈으로 변경해서 테스트 코드도 변경해야함.
         verify(codeReviewService, times(1))
-                .doCodeReview(refEq(codeReviewRequestBody));
+                .doCodeReview(codeReviewRequestBody);
+
+        verify(codeReviewService, times(1))
+                .doCodeReview(codeReviewRequestBody);
     }
+
+
+
+
 }

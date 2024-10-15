@@ -4,8 +4,11 @@ package org.minturtle.careersupport.testutils;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
-import org.minturtle.careersupport.codereview.service.GithubCodeReviewService;
+import org.minturtle.careersupport.codereview.service.CodeReviewService;
 import org.minturtle.careersupport.common.service.ChatService;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
@@ -22,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.time.Instant;
 import java.util.Date;
 
 @SpringBootTest
@@ -40,13 +44,15 @@ public abstract class IntegrationTest {
     @Autowired
     protected JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    protected ApiTokenProvider apiTokenProvider;
 
     @MockBean
     protected ChatService chatService;
 
     // TODO : 추후 실제 빈으로 변경
     @MockBean
-    protected GithubCodeReviewService codeReviewService;
+    protected CodeReviewService codeReviewService;
 
     protected static final String DEFAULT_USER_RAW_PASSWORD = "password";
     protected User createUser(){
@@ -56,7 +62,7 @@ public abstract class IntegrationTest {
     protected User createUser(String username, String password){
         String nickname = "nickname";
 
-        return new User("123", nickname, username, passwordEncoder.encode(password));
+        return new User("123", nickname, username, passwordEncoder.encode(password), null);
 
     }
 

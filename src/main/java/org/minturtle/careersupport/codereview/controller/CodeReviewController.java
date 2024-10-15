@@ -4,7 +4,6 @@ package org.minturtle.careersupport.codereview.controller;
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.service.CodeReviewService;
-import org.minturtle.careersupport.common.utils.Base64Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -13,6 +12,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/code-review")
 @RequiredArgsConstructor
 public class CodeReviewController {
+
     private final CodeReviewService codeReviewService;
 
     @PostMapping("")

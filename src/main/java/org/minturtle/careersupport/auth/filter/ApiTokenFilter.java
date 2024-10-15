@@ -1,5 +1,7 @@
 package org.minturtle.careersupport.auth.filter;
 
+import lombok.RequiredArgsConstructor;
+import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -11,12 +13,21 @@ import reactor.core.publisher.Mono;
 
 
 @Component
+@RequiredArgsConstructor
 public class ApiTokenFilter implements WebFilter {
+
+    private final ApiTokenProvider apiTokenProvider;
+    private final static String API_TOKEN_HEADER = "X-API-TOKEN";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        // TODO: 실제 토큰 검증 및 사용자 정보 추출 로직 구현
-        return Mono.just(new UserInfoDto("username", "role", "token"))
+        String token = exchange.getRequest().getHeaders().getFirst(API_TOKEN_HEADER);
+
+        if (token == null || !token.startsWith("cs_")) {
+            return chain.filter(exchange);
+        }
+
+        return apiTokenProvider.decryptApiToken(token)
                 .map(user -> new UsernamePasswordAuthenticationToken(user, null, null))
                 .flatMap(auth -> chain.filter(exchange)
                         .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth)));

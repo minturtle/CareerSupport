@@ -56,15 +56,11 @@ class InterviewControllerTest extends IntegrationTest {
     @DisplayName("로그인이 완료된 사용자는 자신이 지금까지 했던 면접 주제를 조회할 수 있다.")
     public void testUserGetInterviewTemplate() throws Exception{
         //given
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
 
-        User user = new User(userId, nickname, username, password);
+        User user = createUser();
         List<InterviewTemplate> givenInterviewTemplates = List.of(
-                InterviewTemplate.builder().userId(userId).theme("theme1").build(),
-                InterviewTemplate.builder().userId(userId).theme("theme2").build()
+                InterviewTemplate.builder().userId(user.getId()).theme("theme1").build(),
+                InterviewTemplate.builder().userId(user.getId()).theme("theme2").build()
         );
 
         userRepository.save(user).block();
@@ -94,15 +90,11 @@ class InterviewControllerTest extends IntegrationTest {
     @DisplayName("로그인이 완료된 사용자는 특정 면접 주제에 대한 첫번째 페이지의 메시지 리스트를 조회할 수 있다.")
     public void testUserGetInterviewMessage() throws Exception{
         //given
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
 
         String templateId = "456";
 
-        User user = new User(userId, nickname, username, password);
-        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme("theme1").build();
+        User user = createUser();
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(user.getId()).theme("theme1").build();
 
         List<InterviewMessage> interviewMessages = List.of(
                 InterviewMessage.builder()
@@ -162,15 +154,11 @@ class InterviewControllerTest extends IntegrationTest {
     @DisplayName("로그인이 완료된 사용자는 특정 면접 주제에 대한 두번째 이상 페이지의 메시지 리스트를 조회할 수 있다.")
     public void testUserGetInterviewMessageNextCursor() throws Exception{
         //given
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
 
         String templateId = "456";
 
-        User user = new User(userId, nickname, username, password);
-        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme("theme1").build();
+        User user = createUser();
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(user.getId()).theme("theme1").build();
 
         List<InterviewMessage> interviewMessages = List.of(
                 InterviewMessage.builder()
@@ -232,12 +220,8 @@ class InterviewControllerTest extends IntegrationTest {
     public void testUserCreateNewInterviewTemplate() throws Exception{
         //given
         String theme = "Java Programming";
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
 
-        User user = new User(userId, nickname, username, password);
+        User user = createUser();
 
         userRepository.save(user).block();
 
@@ -270,14 +254,10 @@ class InterviewControllerTest extends IntegrationTest {
         //given
         String theme = "Java Programming";
         String templateId = "template001";
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
         Flux<String> mockQuestions = Flux.just("질문", ":", "당신의 이름은?");
 
-        User user = new User(userId, nickname, username, password);
-        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme(theme).build();
+        User user = createUser();
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(user.getId()).theme(theme).build();
 
         given(chatService.generate(anyString(), eq(theme)))
                 .willReturn(mockQuestions);
@@ -320,15 +300,11 @@ class InterviewControllerTest extends IntegrationTest {
         //given
         String theme = "Java Programming";
         String templateId = "template001";
-        String userId = "123";
-        String nickname = "nickname";
-        String username = "username";
-        String password = "password";
         Flux<String> mockFollowQuestions = Flux.just("다음 질문", ":", "당신의 나이는?");
         String prevQuestionContent = "질문 : 당신의 이름은?";
 
-        User user = new User(userId, nickname, username, password);
-        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(userId).theme(theme).build();
+        User user = createUser();
+        InterviewTemplate interviewTemplate = InterviewTemplate.builder().id(templateId).userId(user.getId()).theme(theme).build();
 
         InterviewMessage prevQuestion = InterviewMessage.builder()
                 .id("message1")
