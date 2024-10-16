@@ -16,8 +16,7 @@ cors:
 jwt:
   secret: SECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRET
   access-token-expire-time: 1000000000000
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 4.0.2
+
+code-review:
+  whitelist:
+    extensions: java, js
