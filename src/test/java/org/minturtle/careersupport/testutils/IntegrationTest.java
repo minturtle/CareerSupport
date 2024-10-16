@@ -10,6 +10,7 @@ import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
 import org.minturtle.careersupport.codereview.service.CodeReviewService;
 import org.minturtle.careersupport.common.service.ChatService;
+import org.minturtle.careersupport.common.utils.GithubUtils;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
 import org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration;
@@ -50,9 +51,8 @@ public abstract class IntegrationTest {
     @MockBean
     protected ChatService chatService;
 
-    // TODO : 추후 실제 빈으로 변경
     @MockBean
-    protected CodeReviewService codeReviewService;
+    protected GithubUtils githubUtils;
 
     protected static final String DEFAULT_USER_RAW_PASSWORD = "password";
     protected User createUser(){
