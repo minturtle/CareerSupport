@@ -4,6 +4,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHPullRequestFileDetail;
 import org.kohsuke.github.GHPullRequestReviewEvent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -12,6 +13,7 @@ import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.service.AiCodeReviewClient.ReviewRequest;
 import org.minturtle.careersupport.codereview.service.AiCodeReviewClient.ReviewResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -30,12 +32,17 @@ public class GithubCodeReviewService implements CodeReviewService {
         return getPullRequest(token, repositoryName, prNumber)
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(pullRequest -> Flux.fromIterable(pullRequest.listFiles())
+                        .filter(GithubCodeReviewService::isJava)
                         .map(ReviewRequest::from)
                         .transform(codeReviewClient::getAiCodeReview)
                         .flatMap(reviewComment -> postCommentsToPullRequest(
                                 pullRequest,
                                 reviewComment)).then()
                 );
+    }
+
+    private static boolean isJava(GHPullRequestFileDetail ghPullRequestFileDetail) {
+        return StringUtils.getFilenameExtension(ghPullRequestFileDetail.getFilename()).equals("java");
     }
 
     private Mono<Void> postCommentsToPullRequest(GHPullRequest pullRequest, ReviewResponse reviewComment) {
