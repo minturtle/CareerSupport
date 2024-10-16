@@ -1,7 +1,7 @@
 package org.minturtle.careersupport.codereview.service;
 
 import lombok.Getter;
-import org.minturtle.careersupport.codereview.dto.PullRequestFile;
+import org.kohsuke.github.GHPullRequestFileDetail;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public interface AiCodeReviewClient {
     Flux<ReviewResponse> getAiCodeReview(Flux<ReviewRequest> files);
 
     @Getter
-    final class ReviewRequest{
+    final class ReviewRequest {
         private final ReviewFileStatus status;
         private final String fileName;
         private final String content;
@@ -23,17 +23,19 @@ public interface AiCodeReviewClient {
             this.content = content;
         }
 
-        public static ReviewRequest of(PullRequestFile prFile){
-            return new ReviewRequest(ReviewFileStatus.valueOf(prFile.status()), prFile.filename(), prFile.patch());
+        public static ReviewRequest from(GHPullRequestFileDetail ghPullRequestFileDetail) {
+            return new ReviewRequest(ReviewFileStatus.valueOf(ghPullRequestFileDetail.getStatus()),
+                    ghPullRequestFileDetail.getFilename(),
+                    ghPullRequestFileDetail.getPatch());
         }
     }
 
-    enum ReviewFileStatus{
+    enum ReviewFileStatus {
         added, removed, modified, renamed, copied, changed, unchanged
     }
 
     @Getter
-    final class ReviewResponse{
+    final class ReviewResponse {
         private final String fileName;
         private final String reviewContent;
 
