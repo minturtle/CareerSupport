@@ -41,7 +41,7 @@ public class GithubCodeReviewService implements CodeReviewService {
     private Mono<Void> postCommentsToPullRequest(GHPullRequest pullRequest, ReviewResponse reviewComment) {
         return Mono.fromCallable(() ->
                         pullRequest.createReview()
-                                .singleLineComment(reviewComment.getReviewContent(), reviewComment.getFileName(), 1)
+                                .comment(reviewComment.getReviewContent(), reviewComment.getFileName(), 1)
                                 .event(GHPullRequestReviewEvent.COMMENT)
                                 .create())
                 .subscribeOn(Schedulers.boundedElastic())
