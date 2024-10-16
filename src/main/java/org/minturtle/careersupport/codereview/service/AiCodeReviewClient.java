@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface AiCodeReviewClient {
 
-    Flux<ReviewResponse> getAiCodeReview(List<ReviewRequest> files);
+    Flux<ReviewResponse> getAiCodeReview(Flux<ReviewRequest> files);
 
     @Getter
     final class ReviewRequest{

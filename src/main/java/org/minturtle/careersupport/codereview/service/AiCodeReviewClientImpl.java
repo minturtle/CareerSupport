@@ -25,8 +25,8 @@ public class AiCodeReviewClientImpl implements AiCodeReviewClient{
     private String codeReviewSystemMessage;
 
     @Override
-    public Flux<ReviewResponse> getAiCodeReview(List<ReviewRequest> files) {
-        return Flux.fromIterable(files).flatMap(
+    public Flux<ReviewResponse> getAiCodeReview(Flux<ReviewRequest> files) {
+        return files.flatMap(
                 file-> {
                     try {
                         return chatService.generate(codeReviewSystemMessage, objectMapper.writeValueAsString(file))
