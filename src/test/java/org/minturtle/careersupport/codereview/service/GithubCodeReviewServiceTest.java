@@ -10,10 +10,12 @@ import org.minturtle.careersupport.common.utils.GithubUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -54,7 +56,6 @@ class GithubCodeReviewServiceTest {
                 .willReturn(mockPrFacade);
 
         given(mockPrFacade.getChangedFiles()).willReturn(fakeGithubReqFileDetail);
-        willDoNothing().given(mockPrFacade).comment(any());
 
         given(fakeGithubReqFileDetail.get(0).getFilename()).willReturn("test.java");
         given(fakeGithubReqFileDetail.get(0).getStatus()).willReturn("modified");
@@ -67,33 +68,26 @@ class GithubCodeReviewServiceTest {
         given(fakeGithubReqFileDetail.get(2).getPatch()).willReturn("124");
 
         given(mockCodeReviewClient.getAiCodeReview(any())).willReturn(
-                Flux.just(
-                        new AiCodeReviewClient.ReviewResponse("test.java", "댓글 1"),
-                        new AiCodeReviewClient.ReviewResponse("test.js", "댓글 2")
-                )
+                Mono.just(new AiCodeReviewClient.ReviewResponse("filename", "comment"))
         );
 
 
-        //when
+        //when & then
+        // java, js에 대해 값이 반환될 것을 예상
         StepVerifier.create(githubCodeReviewService.doCodeReview(codeReviewRequest))
+                .assertNext(response -> {
+                    assertThat(response.getFileName()).isEqualTo("filename");
+                    assertThat(response.getReviewContent()).isEqualTo("comment");
+                })
+                .assertNext(response -> {
+                    assertThat(response.getFileName()).isEqualTo("filename");
+                    assertThat(response.getReviewContent()).isEqualTo("comment");
+                })
                 .verifyComplete();
-
-        //then
-        // gradle은 필터링되어서 java와 js만 실행되어야 한다.
-        verify(mockPrFacade, times(2))
-                .comment(any());
-
-
 
         // AI 코드리뷰는 java와 js, 두개에 대해 실행되어야 한다.
-        ArgumentCaptor<Flux<AiCodeReviewClient.ReviewRequest>> captor = forClass(Flux.class);
-
-        verify(mockCodeReviewClient, times(1))
-                .getAiCodeReview(captor.capture());
-        Flux<AiCodeReviewClient.ReviewRequest> capturedFlux = captor.getValue();
-        StepVerifier.create(capturedFlux)
-                .expectNextCount(2)
-                .verifyComplete();
+        verify(mockCodeReviewClient, times(2))
+                .getAiCodeReview(any());
     }
 
 }

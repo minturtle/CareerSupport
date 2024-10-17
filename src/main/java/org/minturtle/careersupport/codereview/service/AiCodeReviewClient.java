@@ -3,12 +3,13 @@ package org.minturtle.careersupport.codereview.service;
 import lombok.Getter;
 import org.kohsuke.github.GHPullRequestFileDetail;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface AiCodeReviewClient {
 
-    Flux<ReviewResponse> getAiCodeReview(Flux<ReviewRequest> files);
+    Mono<ReviewResponse> getAiCodeReview(ReviewRequest file);
 
     @Getter
     final class ReviewRequest {

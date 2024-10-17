@@ -4,19 +4,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.*;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
+import org.minturtle.careersupport.codereview.service.AiCodeReviewClient;
+import org.minturtle.careersupport.common.dto.CommonResponseBody;
 import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.testutils.IntegrationTest;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 class CodeReviewControllerTest extends IntegrationTest {
@@ -41,7 +44,6 @@ class CodeReviewControllerTest extends IntegrationTest {
         given(githubUtils.generatePullRequest(ghpToken, repositoryName, prNumber))
                 .willReturn(mockPrFacade);
         given(mockPrFacade.getChangedFiles()).willReturn(fakeGithubReqFileDetail);
-        willDoNothing().given(mockPrFacade).comment(any());
 
         given(fakeGithubReqFileDetail.get(0).getFilename()).willReturn("test.java");
         given(fakeGithubReqFileDetail.get(0).getStatus()).willReturn("modified");
@@ -58,16 +60,22 @@ class CodeReviewControllerTest extends IntegrationTest {
 
 
         // when & then
-        webTestClient.post()
+        CommonResponseBody<List<AiCodeReviewClient.ReviewResponse>> responseBody = webTestClient.post()
                 .uri("/api/code-review")
                 .header("X-API-TOKEN", apiToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(codeReviewRequestBody)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectBody(new ParameterizedTypeReference<CommonResponseBody<List<AiCodeReviewClient.ReviewResponse>>>() {
+                })
+                .returnResult()
+                .getResponseBody();
 
         verify(mockPrFacade, times(1)).getChangedFiles();
-        verify(mockPrFacade, times(fakeGithubReqFileDetail.size())).comment(any());
+        assertThat(responseBody.getData()).hasSize(1);
+        assertThat(responseBody.getData().get(0)).extracting("fileName", "reviewContent")
+                .containsExactly("test.java", "AI댓글테스트");
     }
 
 
