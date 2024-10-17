@@ -35,6 +35,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 	implementation 'com.google.cloud:google-cloud-logging-logback:0.131.10-alpha'
+	implementation 'org.kohsuke:github-api:2.0.0-alpha-2'
 
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt:0.12.6'
@@ -45,9 +46,15 @@ dependencies {
 	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
 
 	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0'
+	testImplementation 'de.bwaldvogel:mongo-java-server:1.45.0'
+
+	testImplementation 'org.junit.platform:junit-platform-launcher:1.11.2'
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
 }
 
 dependencyManagement {

@@ -25,4 +25,9 @@ public class User {
 
     private String password;
 
+    private String apiToken;
+
+    public void setApiToken(String apiToken) {
+        this.apiToken = apiToken;
+    }
 }
