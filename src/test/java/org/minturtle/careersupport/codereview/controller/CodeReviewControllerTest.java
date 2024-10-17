@@ -2,18 +2,22 @@ package org.minturtle.careersupport.codereview.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.kohsuke.github.*;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
+import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.testutils.IntegrationTest;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
 import org.springframework.http.MediaType;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.*;
 
 class CodeReviewControllerTest extends IntegrationTest {
 
@@ -26,7 +30,24 @@ class CodeReviewControllerTest extends IntegrationTest {
         String apiToken = apiTokenProvider.generate(UserInfoDto.of(user)).block();
         String ghpToken = "ghp_asdasdsaf21321";
         String repositoryName = "minturtle/careersupport";
-        long prNumber = 1L;
+        int prNumber = 1;
+
+        List<GHPullRequestFileDetail> fakeGithubReqFileDetail = List.of(
+                 mock(GHPullRequestFileDetail.class)
+        );
+
+        GithubPullRequestFacade mockPrFacade = mock(GithubPullRequestFacade.class);
+
+        given(githubUtils.generatePullRequest(ghpToken, repositoryName, prNumber))
+                .willReturn(mockPrFacade);
+        given(mockPrFacade.getChangedFiles()).willReturn(fakeGithubReqFileDetail);
+        willDoNothing().given(mockPrFacade).comment(any());
+
+        given(fakeGithubReqFileDetail.get(0).getFilename()).willReturn("test.java");
+        given(fakeGithubReqFileDetail.get(0).getStatus()).willReturn("modified");
+        given(fakeGithubReqFileDetail.get(0).getPatch()).willReturn("122");
+
+        given(chatService.generate(any(), any())).willReturn(Flux.just("AI", "댓글", "테스트"));
 
 
         CodeReviewRequest codeReviewRequestBody = CodeReviewRequest.builder()
@@ -35,8 +56,6 @@ class CodeReviewControllerTest extends IntegrationTest {
                 .githubToken(ghpToken)
                 .build();
 
-        given(codeReviewService.doCodeReview(codeReviewRequestBody))
-                .willReturn(Mono.empty());
 
         // when & then
         webTestClient.post()
@@ -47,12 +66,8 @@ class CodeReviewControllerTest extends IntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
 
-        // TODO : 추후에 실제 빈으로 변경해서 테스트 코드도 변경해야함.
-        verify(codeReviewService, times(1))
-                .doCodeReview(codeReviewRequestBody);
-
-        verify(codeReviewService, times(1))
-                .doCodeReview(codeReviewRequestBody);
+        verify(mockPrFacade, times(1)).getChangedFiles();
+        verify(mockPrFacade, times(fakeGithubReqFileDetail.size())).comment(any());
     }
 
 

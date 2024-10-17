@@ -13,5 +13,5 @@ import java.util.Map;
 public final class CodeReviewRequest {
     private String githubToken;
     private String repositoryName;
-    private Long prNumber;
+    private Integer prNumber;
 }
