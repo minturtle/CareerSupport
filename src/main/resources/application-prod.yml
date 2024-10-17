@@ -53,4 +53,4 @@ jwt:
 
 code-review:
   whitelist:
-    extensions: .java, .py, .js, .ts, .c, .cpp, .cc, .cxx, .cs, .go, .rb, .swift, .kt, .kts, .php, .pl, .pm, .r, .scala, .rs, .dart, .hs, .lua, .sh, .bat
+    extensions: java, py, js, ts, c, cpp, cc, cxx, cs, go, rb, swift, kt, kts, php, pl, pm, r, scala, rs, dart, hs, lua, sh, bat
