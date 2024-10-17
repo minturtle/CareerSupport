@@ -30,15 +30,4 @@ public class GithubPullRequestFacade {
         }
     }
 
-    public void comment(String content){
-        try {
-            pullRequest.comment(content);
-        }catch (IOException e){
-            throw new InternalServerException("Github 서버와 통신 중 오류가 발생했습니다.", e);
-        }
-
-    }
-
-
-
 }
