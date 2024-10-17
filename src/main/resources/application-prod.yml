@@ -41,7 +41,8 @@ spring:
               5-1. 로그가 적절한 수준에서 기록되고 있는가? 과도한 로그는 없는가?
               5-2. 오류 발생 시 문제를 쉽게 추적할 수 있는 디버깅 정보가 있는가?
           6. 코드에 필요한 주석이나 문서화가 적절하게 작성되어 있는가?
-          위 검토 사항을 검토하고, 개선이 필요한 체크리스트를 한글로 작성해 줍니다.
+          위 검토 사항을 검토하고, 개선이 필요한 체크리스트를 한글로 작성해 줍니다. 이때, 답변의 크기를 최소한으로 줄이기 위해 꼭 필요한 내용만 작성합니다.
+          답변에는 어떤 파일에 대한 코드리뷰라는 설명이 반드시 들어가야 합니다.
   encryption:
     key: ${SPRING_ENCRYPTION_KEY}
 cors:
@@ -49,3 +50,7 @@ cors:
 jwt:
   secret: ${JWT_SECRET}
   access-token-expire-time: ${JWT_EXPIRY_TIME}
+
+code-review:
+  whitelist:
+    extensions: .java, .py, .js, .ts, .c, .cpp, .cc, .cxx, .cs, .go, .rb, .swift, .kt, .kts, .php, .pl, .pm, .r, .scala, .rs, .dart, .hs, .lua, .sh, .bat
