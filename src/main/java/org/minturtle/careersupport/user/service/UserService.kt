@@ -30,11 +30,11 @@ class UserService(
 
         val encodedPassword = passwordEncoder.encode(registrationDto.password)
 
-        val newUser = User.builder()
-            .nickname(registrationDto.nickname)
-            .username(registrationDto.username)
-            .password(encodedPassword)
-            .build()
+        val newUser = User(
+            registrationDto.nickname,
+            registrationDto.username,
+            encodedPassword
+        )
 
         val savedUser = userRepository.save(newUser).awaitSingle()
 

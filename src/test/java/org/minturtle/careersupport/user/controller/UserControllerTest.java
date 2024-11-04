@@ -191,10 +191,10 @@ class UserControllerTest extends IntegrationTest {
                 .getResponseBody();
         //then
         StepVerifier.create(userRepository.findById(user.getId()))
-                        .assertNext(savedUser->assertThat(savedUser.getApiToken()).isEqualTo(responseBody.token()))
+                        .assertNext(savedUser->assertThat(savedUser.getApiToken()).isEqualTo(responseBody.getToken()))
                                 .verifyComplete();
 
-        StepVerifier.create(apiTokenProvider.decryptApiToken(responseBody.token()))
+        StepVerifier.create(apiTokenProvider.decryptApiToken(responseBody.getToken()))
                 .assertNext(decrypted -> assertThat(decrypted).isEqualTo(UserInfoDto.of(user)))
                 .verifyComplete();
     }

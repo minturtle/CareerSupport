@@ -3,7 +3,6 @@ package org.minturtle.careersupport.auth.filter;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
-import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
