@@ -2,7 +2,6 @@ package org.minturtle.careersupport.auth.filter;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
-import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;

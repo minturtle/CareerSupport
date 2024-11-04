@@ -58,7 +58,7 @@ public abstract class IntegrationTest {
     protected User createUser(String username, String password){
         String nickname = "nickname";
 
-        return new User("123", nickname, username, passwordEncoder.encode(password), null);
+        return new User(nickname, username, passwordEncoder.encode(password), null);
 
     }
 
