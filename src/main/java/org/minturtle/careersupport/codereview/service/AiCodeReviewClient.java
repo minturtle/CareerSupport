@@ -1,11 +1,8 @@
 package org.minturtle.careersupport.codereview.service;
 
 import lombok.Getter;
-import org.kohsuke.github.GHPullRequestFileDetail;
-import reactor.core.publisher.Flux;
+import org.kohsuke.github.GHCommit.File;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public interface AiCodeReviewClient {
 
@@ -24,10 +21,10 @@ public interface AiCodeReviewClient {
             this.content = content;
         }
 
-        public static ReviewRequest from(GHPullRequestFileDetail ghPullRequestFileDetail) {
-            return new ReviewRequest(ReviewFileStatus.valueOf(ghPullRequestFileDetail.getStatus()),
-                    ghPullRequestFileDetail.getFilename(),
-                    ghPullRequestFileDetail.getPatch());
+        public static ReviewRequest from(File file) {
+            return new ReviewRequest(ReviewFileStatus.valueOf(file.getStatus()),
+                    file.getFileName(),
+                    file.getPatch());
         }
     }
 
