@@ -5,39 +5,39 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHPullRequestFileDetail;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
+import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
 import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.common.utils.GithubUtils;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
 class GithubCodeReviewServiceTest {
-
+    @Mock
+    ReviewPinpointRepository reviewPinpointRepository;
 
     private final AiCodeReviewClient mockCodeReviewClient = mock(AiCodeReviewClient.class);
 
     private final GithubUtils mockGithubUtils = mock(GithubUtils.class);
 
     private final List<String> whiteList = List.of("java", "js");
-    private final GithubCodeReviewService githubCodeReviewService = new GithubCodeReviewService(mockCodeReviewClient, mockGithubUtils, whiteList);
+    private final GithubCodeReviewService githubCodeReviewService = new GithubCodeReviewService(mockCodeReviewClient,
+            mockGithubUtils, reviewPinpointRepository, whiteList);
 
 
     @Test
     @DisplayName("Whitelist에 속한 확장자의 파일만 코드리뷰를 요청할 수 있다.")
-    public void testFilterWhiteList() throws Exception{
+    public void testFilterWhiteList() throws Exception {
         //given
         List<GHPullRequestFileDetail> fakeGithubReqFileDetail = List.of(
                 mock(GHPullRequestFileDetail.class),
@@ -70,7 +70,6 @@ class GithubCodeReviewServiceTest {
         given(mockCodeReviewClient.getAiCodeReview(any())).willReturn(
                 Mono.just(new AiCodeReviewClient.ReviewResponse("filename", "comment"))
         );
-
 
         //when & then
         // java, js에 대해 값이 반환될 것을 예상
