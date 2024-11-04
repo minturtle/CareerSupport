@@ -3,13 +3,11 @@ package org.minturtle.careersupport.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.common.exception.BadRequestException;
-import org.minturtle.careersupport.common.exception.ConflictException;
 import org.minturtle.careersupport.common.exception.UnAuthorizedException;
 import org.minturtle.careersupport.user.dto.*;
 import org.minturtle.careersupport.user.resolvers.annotations.CurrentUser;
 import org.minturtle.careersupport.user.service.UserService;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
