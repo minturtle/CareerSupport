@@ -15,7 +15,6 @@ java {
 	}
 }
 
-apply plugin: 'kotlin-spring'
 
 jar {
 	enabled = false // 기본 jar 태스크를 비활성화하여 plain JAR 파일이 생성되지 않도록 설정
@@ -35,8 +34,9 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor'
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+	implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
@@ -65,7 +65,8 @@ dependencies {
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
 }
