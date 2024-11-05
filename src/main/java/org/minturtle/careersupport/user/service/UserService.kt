@@ -1,5 +1,8 @@
 package org.minturtle.careersupport.user.service
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.reactor.awaitSingle
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider
@@ -43,7 +46,7 @@ class UserService(
 
     suspend fun login(username: String, password: String): UserLoginResponse {
         val user = userRepository.findByUsername(username)
-            ?.takeIf { passwordEncoder.matches(password, it.password) }
+            ?.takeIf { passwordEncoder.matchesAsync(password, it.password) }
             ?: throw UnAuthorizedException("Invalid credentials")
 
         val jwt = jwtTokenProvider.sign(UserInfoDto.of(user), Date()).awaitSingle()
@@ -65,5 +68,11 @@ class UserService(
 
         userRepository.save(findUser).awaitSingle()
         return UserApiAccessTokenResponse(token)
+    }
+
+    private suspend fun PasswordEncoder.matchesAsync(rawPassword: String, encodedPassword: String) : Boolean{
+        return CoroutineScope(Dispatchers.IO).async {
+            passwordEncoder.matches(rawPassword, encodedPassword)
+        }.await()
     }
 }
