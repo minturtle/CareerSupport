@@ -1,6 +1,5 @@
 package org.minturtle.careersupport.codereview.service;
 
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.github.GHCommit.File;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
@@ -51,13 +50,13 @@ public class GithubCodeReviewService implements CodeReviewService {
 
         return Mono.just(githubUtils.generatePullRequest(token, repositoryName, prNumber))
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(pullRequest -> getReviewResponseFromAi(prNumber, pullRequest));
+                .flatMapMany(pullRequest -> getReviewResponseFromAi(prNumber, repositoryName, pullRequest));
     }
 
-    private Flux<ReviewResponse> getReviewResponseFromAi(int prNumber, GithubPullRequestFacade pullRequest) {
-        return reviewPinpointRepository.findByPrNumber(prNumber)
+    private Flux<ReviewResponse> getReviewResponseFromAi(int prNumber, String repositoryName, GithubPullRequestFacade pullRequest) {
+        return reviewPinpointRepository.findByPrNumberAndRepositoryName(prNumber,repositoryName)
                 .flatMapMany(commitPinpoint ->
-                        pullRequest.getCommitsDiffAfter(commitPinpoint.getSha())
+                        pullRequest.getCommitsDiffAfter(commitPinpoint.getLastSha())
                                 .contextWrite(context -> context.put(CONTEXT_KEY, commitPinpoint))
                 )
                 .switchIfEmpty(
@@ -104,7 +103,7 @@ public class GithubCodeReviewService implements CodeReviewService {
     private Mono<Void> savePinPoint(int prNumber, List<File> files) {
         String lastCommitSha = files.get(files.size() - 1).getSha();
         CommitPinpoint commitPinpoint = CommitPinpoint.builder()
-                .sha(lastCommitSha)
+                .lastSha(lastCommitSha)
                 .prNumber(prNumber)
                 .build();
         return reviewPinpointRepository.save(commitPinpoint).then();
