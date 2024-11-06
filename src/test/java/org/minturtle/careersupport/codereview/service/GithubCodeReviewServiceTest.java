@@ -3,6 +3,7 @@ package org.minturtle.careersupport.codereview.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.kohsuke.github.GHCommit.File;
 import org.kohsuke.github.GHPullRequestFileDetail;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
@@ -10,6 +11,7 @@ import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.common.utils.GithubUtils;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -23,8 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GithubCodeReviewServiceTest {
-    @Mock
-    ReviewPinpointRepository reviewPinpointRepository;
+    private final ReviewPinpointRepository reviewPinpointRepository = mock(ReviewPinpointRepository.class);
 
     private final AiCodeReviewClient mockCodeReviewClient = mock(AiCodeReviewClient.class);
 
@@ -39,11 +40,11 @@ class GithubCodeReviewServiceTest {
     @DisplayName("Whitelist에 속한 확장자의 파일만 코드리뷰를 요청할 수 있다.")
     public void testFilterWhiteList() throws Exception {
         //given
-        List<GHPullRequestFileDetail> fakeGithubReqFileDetail = List.of(
-                mock(GHPullRequestFileDetail.class),
-                mock(GHPullRequestFileDetail.class),
-                mock(GHPullRequestFileDetail.class)
-        );
+        File file1 = mock(File.class);
+        File file2 = mock(File.class);
+        File file3 = mock(File.class);
+
+        Flux<File> fakeFiles = Flux.fromIterable(List.of(file1, file2, file3));
         CodeReviewRequest codeReviewRequest = new CodeReviewRequest("ghtk", "rpnm", 1);
 
         GithubPullRequestFacade mockPrFacade = mock(GithubPullRequestFacade.class);
@@ -52,24 +53,26 @@ class GithubCodeReviewServiceTest {
                 codeReviewRequest.getGithubToken(),
                 codeReviewRequest.getRepositoryName(),
                 codeReviewRequest.getPrNumber())
-        )
-                .willReturn(mockPrFacade);
+        ).willReturn(mockPrFacade);
 
-        given(mockPrFacade.getChangedFiles()).willReturn(fakeGithubReqFileDetail);
+        given(mockPrFacade.getCommitsDiff()).willReturn(fakeFiles);
 
-        given(fakeGithubReqFileDetail.get(0).getFilename()).willReturn("test.java");
-        given(fakeGithubReqFileDetail.get(0).getStatus()).willReturn("modified");
-        given(fakeGithubReqFileDetail.get(0).getPatch()).willReturn("122");
+        given(file1.getFileName()).willReturn("test.java");
+        given(file1.getStatus()).willReturn("modified");
+        given(file1.getPatch()).willReturn("122");
 
-        given(fakeGithubReqFileDetail.get(1).getFilename()).willReturn("test.gradle");
+        given(file2.getFileName()).willReturn("test.gradle");
 
-        given(fakeGithubReqFileDetail.get(2).getFilename()).willReturn("test.js");
-        given(fakeGithubReqFileDetail.get(2).getStatus()).willReturn("modified");
-        given(fakeGithubReqFileDetail.get(2).getPatch()).willReturn("124");
+        given(file3.getFileName()).willReturn("test.js");
+        given(file3.getStatus()).willReturn("modified");
+        given(file3.getPatch()).willReturn("124");
 
         given(mockCodeReviewClient.getAiCodeReview(any())).willReturn(
                 Mono.just(new AiCodeReviewClient.ReviewResponse("filename", "comment"))
         );
+
+        given(reviewPinpointRepository.findByPrNumber(anyInt())).willReturn(Mono.empty());
+        given(reviewPinpointRepository.save(any())).willReturn(Mono.empty());
 
         //when & then
         // java, js에 대해 값이 반환될 것을 예상
