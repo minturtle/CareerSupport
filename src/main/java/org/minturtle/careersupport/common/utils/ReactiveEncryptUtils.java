@@ -46,7 +46,7 @@ public class ReactiveEncryptUtils {
             byteBuffer.put(encryptedData);
 
             return Base64.getEncoder().encodeToString(byteBuffer.array());
-        }).onErrorMap(e -> new RuntimeException("Encryption failed", e));
+        }).onErrorMap(e -> new RuntimeException("Encryption failed : " + e.getMessage(), e));
     }
 
     public Mono<String> decrypt(String encryptedData) {
@@ -65,6 +65,6 @@ public class ReactiveEncryptUtils {
 
             byte[] decryptedData = cipher.doFinal(cipherText);
             return new String(decryptedData, StandardCharsets.UTF_8);
-        }).onErrorMap(e -> new BadRequestException("Decryption failed", e));
+        }).onErrorMap(e -> new BadRequestException("Decryption failed" + e.getMessage(), e));
     }
 }
