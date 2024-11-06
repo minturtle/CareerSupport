@@ -17,14 +17,16 @@ public class CommitPinpoint {
     @Id
     private String id;
 
-    private String sha;
+    private String lastSha;
 
     private Integer prNumber;
+
+    private String repositoryName;
 
     @Builder.Default
     private Instant createdAt = Instant.now();
 
     public void upDateSha(String newSha) {
-        this.sha = newSha;
+        this.lastSha = newSha;
     }
 }
