@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -46,7 +47,9 @@ public class ReactiveEncryptUtils {
             byteBuffer.put(encryptedData);
 
             return Base64.getEncoder().encodeToString(byteBuffer.array());
-        }).onErrorMap(e -> new RuntimeException("Encryption failed : " + e.getMessage(), e));
+        })
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorMap(e -> new RuntimeException("Encryption failed : " + e.getMessage(), e));
     }
 
     public Mono<String> decrypt(String encryptedData) {
@@ -65,6 +68,8 @@ public class ReactiveEncryptUtils {
 
             byte[] decryptedData = cipher.doFinal(cipherText);
             return new String(decryptedData, StandardCharsets.UTF_8);
-        }).onErrorMap(e -> new BadRequestException("Decryption failed" + e.getMessage(), e));
+        })
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorMap(e -> new BadRequestException("Decryption failed" + e.getMessage(), e));
     }
 }
