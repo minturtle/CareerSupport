@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 
 @Logging
 public interface ReviewPinpointRepository extends ReactiveMongoRepository<CommitPinpoint, String> {
-    Mono<CommitPinpoint> findByPrNumber(Integer prNumber);
+    Mono<CommitPinpoint> findByPrNumberAndRepositoryName(Integer prNumber, String repositoryName);
 }
