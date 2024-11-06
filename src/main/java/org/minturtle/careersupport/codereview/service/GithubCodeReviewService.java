@@ -33,21 +33,17 @@ public class GithubCodeReviewService implements CodeReviewService {
     }
 
     @Override
-    public Mono<Void> doCodeReview(CodeReviewRequest codeReviewRequest) {
+    public Flux<AiCodeReviewClient.ReviewResponse> doCodeReview(CodeReviewRequest codeReviewRequest) {
         String token = codeReviewRequest.getGithubToken();
         String repositoryName = codeReviewRequest.getRepositoryName();
         int prNumber = codeReviewRequest.getPrNumber();
 
         return Mono.just(githubUtils.generatePullRequest(token, repositoryName, prNumber))
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(pullRequest -> Flux.fromIterable(pullRequest.getChangedFiles())
+                .flatMapMany(pullRequest -> Flux.fromIterable(pullRequest.getChangedFiles())
                         .filter(this::filterWhiteList)
                         .map(ReviewRequest::from)
-                        .transform(codeReviewClient::getAiCodeReview)
-                        .flatMap(reviewComment ->
-                                Mono.fromRunnable(() -> pullRequest.comment(reviewComment.getReviewContent()))
-                                .subscribeOn(Schedulers.boundedElastic())
-                        ).then()
+                        .flatMap(codeReviewClient::getAiCodeReview)
                 );
     }
 
