@@ -2,13 +2,11 @@ package org.minturtle.careersupport.codereview.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kohsuke.github.*;
 import org.kohsuke.github.GHCommit.File;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.entity.CommitPinpoint;
 import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
 import org.minturtle.careersupport.codereview.service.AiCodeReviewClient;
-import org.minturtle.careersupport.codereview.service.AiCodeReviewClient.ReviewResponse;
 import org.minturtle.careersupport.common.dto.CommonResponseBody;
 import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.testutils.IntegrationTest;
@@ -48,7 +46,7 @@ class CodeReviewControllerTest extends IntegrationTest {
         GithubPullRequestFacade mockPrFacade = mock(GithubPullRequestFacade.class);
         CommitPinpoint pinpoint = CommitPinpoint.builder()
                 .prNumber(prNumber)
-                .sha("sha")
+                .lastSha("sha")
                 .build();
 
 
@@ -62,7 +60,7 @@ class CodeReviewControllerTest extends IntegrationTest {
         given(files[0].getStatus()).willReturn("modified");
         given(files[0].getPatch()).willReturn("122");
 
-        given(reviewPinpointRepository.findByPrNumber(anyInt())).willReturn(Mono.empty());
+        given(reviewPinpointRepository.findByPrNumberAndRepositoryName(anyInt(),anyString())).willReturn(Mono.empty());
         given(reviewPinpointRepository.save(any())).willReturn(Mono.just(pinpoint));
 
         given(chatService.generate(any(), any())).willReturn(Flux.just("AI", "댓글", "테스트"));

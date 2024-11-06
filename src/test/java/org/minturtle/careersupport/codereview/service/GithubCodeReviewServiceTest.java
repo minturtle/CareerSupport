@@ -4,12 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHCommit.File;
-import org.kohsuke.github.GHPullRequestFileDetail;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
 import org.minturtle.careersupport.common.facade.GithubPullRequestFacade;
 import org.minturtle.careersupport.common.utils.GithubUtils;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,7 +69,7 @@ class GithubCodeReviewServiceTest {
                 Mono.just(new AiCodeReviewClient.ReviewResponse("filename", "comment"))
         );
 
-        given(reviewPinpointRepository.findByPrNumber(anyInt())).willReturn(Mono.empty());
+        given(reviewPinpointRepository.findByPrNumberAndRepositoryName(anyInt(),anyString())).willReturn(Mono.empty());
         given(reviewPinpointRepository.save(any())).willReturn(Mono.empty());
 
         //when & then
