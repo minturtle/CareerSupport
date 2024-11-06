@@ -1,11 +1,12 @@
 package org.minturtle.careersupport.common.entity
 
+import org.minturtle.careersupport.common.utils.NanoIdGenerator
 import org.springframework.data.annotation.Id
 
 
 open class BaseEntity{
     @Id
-    var id: String = ""
+    var id: String = NanoIdGenerator.createNanoId(10)
         protected set
 
     override fun equals(other: Any?): Boolean {
