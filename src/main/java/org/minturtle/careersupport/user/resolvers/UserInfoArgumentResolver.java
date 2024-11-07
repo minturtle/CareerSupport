@@ -4,7 +4,6 @@ package org.minturtle.careersupport.user.resolvers;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.resolvers.annotations.CurrentUser;
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
