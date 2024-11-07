@@ -4,15 +4,12 @@ package org.minturtle.careersupport.codereview.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.minturtle.careersupport.codereview.dto.PullRequestFile;
 import org.minturtle.careersupport.common.exception.InternalServerException;
 import org.minturtle.careersupport.common.service.ChatService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component

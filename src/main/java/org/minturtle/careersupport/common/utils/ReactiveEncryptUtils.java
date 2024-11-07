@@ -4,7 +4,6 @@ package org.minturtle.careersupport.common.utils;
 import org.minturtle.careersupport.common.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
