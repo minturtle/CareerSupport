@@ -71,11 +71,11 @@ public class JwtTokenProvider {
             Claims payload = Jwts.parser().verifyWith(key).build()
                     .parseSignedClaims(token).getPayload();
 
-            return UserInfoDto.builder()
-                    .id(payload.getSubject())
-                    .nickname(payload.get(USER_NICKNAME_CLAIM_NAME, String.class))
-                    .username(payload.get(USER_USERNAME_CLAIM_NAME, String.class))
-                    .build();
+            return new UserInfoDto(
+                    payload.getSubject(),
+                    payload.get(USER_NICKNAME_CLAIM_NAME, String.class),
+                    payload.get(USER_USERNAME_CLAIM_NAME, String.class)
+            );
         }).subscribeOn(Schedulers.boundedElastic());
     }
 

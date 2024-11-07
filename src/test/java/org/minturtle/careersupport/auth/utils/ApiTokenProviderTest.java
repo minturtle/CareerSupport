@@ -1,10 +1,11 @@
 package org.minturtle.careersupport.auth.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.minturtle.careersupport.common.exception.BadRequestException;
 import org.minturtle.careersupport.common.utils.ReactiveEncryptUtils;
@@ -19,8 +20,10 @@ class ApiTokenProviderTest {
     private ReactiveEncryptUtils reactiveEncryptUtils =
             new ReactiveEncryptUtils("X1XnwJ2Vrdw9wqdfX0rOdLfNJ8rwrvB9");
 
-    private ObjectMapper objectMapper =
-            new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new KotlinModule.Builder()
+                    .configure(KotlinFeature.NullToEmptyCollection, true)
+                    .build());
     private ApiTokenProvider apiTokenProvider =
             new ApiTokenProvider(reactiveEncryptUtils, objectMapper);
 
