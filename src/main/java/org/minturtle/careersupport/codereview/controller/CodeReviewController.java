@@ -3,8 +3,6 @@ package org.minturtle.careersupport.codereview.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
-import org.minturtle.careersupport.codereview.service.AiCodeReviewClient;
-import org.minturtle.careersupport.codereview.service.CodeReviewService;
 import org.minturtle.careersupport.common.dto.CommonResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

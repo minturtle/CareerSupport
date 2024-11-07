@@ -3,7 +3,6 @@ package org.minturtle.careersupport.interview.service;
 
 import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.common.aop.Logging;
-import org.minturtle.careersupport.common.service.ChatService;
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse;
 import org.minturtle.careersupport.interview.dto.InterviewTemplateResponse;
 import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository;

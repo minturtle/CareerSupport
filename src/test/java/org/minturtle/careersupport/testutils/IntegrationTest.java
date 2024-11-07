@@ -6,8 +6,6 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider;
-import org.minturtle.careersupport.common.service.ChatService;
-import org.minturtle.careersupport.common.utils.GithubUtils;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;
 import org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration;

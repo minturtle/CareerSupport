@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.minturtle.careersupport.common.aop.Logging;
 import org.minturtle.careersupport.common.exception.BadRequestException;
 import org.minturtle.careersupport.common.exception.InternalServerException;
-import org.minturtle.careersupport.common.utils.ReactiveEncryptUtils;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
