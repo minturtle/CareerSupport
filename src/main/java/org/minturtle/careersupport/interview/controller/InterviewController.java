@@ -55,10 +55,10 @@ public class InterviewController {
                     }
 
                     Collections.reverse(list);
-                    return CursoredResponse.<InterviewMessageResponse>builder()
-                            .cursor(nextCursor)
-                            .data(list)
-                            .build();
+                    return new CursoredResponse<>(
+                            nextCursor,
+                            list
+                    );
                 });
     }
 
