@@ -51,7 +51,7 @@ class GithubCodeReviewService(
         } ?: pullRequest.getCommitsDiff()
 
         // commitPinPoint를 업데이트
-        reviewPinpointRepository.persist(prNumber, changedFiles, commitPinpoint)
+        reviewPinpointRepository.persist(prNumber, repositoryName, changedFiles, commitPinpoint)
 
         changedFiles.filter { filterWhiteList(it) }
             .map { CodeReviewFileInfo.from(it) }
@@ -66,12 +66,13 @@ class GithubCodeReviewService(
 
     private fun ReviewPinpointRepository.persist(
         prNumber: Int,
+        repositoryName: String,
         files: List<GHCommit.File>,
         commitPinpoint: CommitPinpoint?
     ) {
         commitPinpoint?.let {
             updatePinPoint(commitPinpoint, files)
-        } ?: savePinPoint(prNumber, files)
+        } ?: savePinPoint(prNumber, repositoryName, files)
     }
 
     /**
@@ -82,7 +83,7 @@ class GithubCodeReviewService(
      */
     private fun updatePinPoint(existingPinpoint: CommitPinpoint, files: List<GHCommit.File>){
         val newSha = files[files.size - 1].sha
-        existingPinpoint.upDateSha(newSha)
+        existingPinpoint.lastSha = newSha
         reviewPinpointRepository.save(existingPinpoint).subscribe()
     }
 
@@ -92,12 +93,13 @@ class GithubCodeReviewService(
      * @param prNumber PR 번호
      * @param files    파일 리스트
      */
-    private fun savePinPoint(prNumber: Int, files: List<GHCommit.File>) {
+    private fun savePinPoint(prNumber: Int, repositoryName: String, files: List<GHCommit.File>) {
         val lastCommitSha = files[files.size - 1].sha
-        val commitPinpoint = CommitPinpoint.builder()
-            .lastSha(lastCommitSha)
-            .prNumber(prNumber)
-            .build()
+        val commitPinpoint = CommitPinpoint(
+            lastSha = lastCommitSha,
+            prNumber = prNumber,
+            repositoryName = repositoryName
+        )
         reviewPinpointRepository.save(commitPinpoint).subscribe()
     }
 
