@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHCommit.File;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
-import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

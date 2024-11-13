@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHCommit.File;
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest;
 import org.minturtle.careersupport.codereview.entity.CommitPinpoint;
-import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository;
 import org.minturtle.careersupport.common.dto.CommonResponseBody;
 import org.minturtle.careersupport.testutils.IntegrationTest;
 import org.minturtle.careersupport.user.dto.UserInfoDto;

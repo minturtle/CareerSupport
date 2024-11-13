@@ -56,6 +56,7 @@ class GithubCodeReviewService(
         changedFiles.filter { filterWhiteList(it) }
             .map { CodeReviewFileInfo.from(it) }
             .map {
+                // 비동기로 동시에 실행
                 async{ codeReviewClient.getAiCodeReview(it) }
             }
             .awaitAll()
