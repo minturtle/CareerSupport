@@ -2,7 +2,6 @@ package org.minturtle.careersupport.common.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.minturtle.careersupport.auth.utils.ApiTokenProvider;
 import org.minturtle.careersupport.testutils.IntegrationTest;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import org.minturtle.careersupport.user.entity.User;

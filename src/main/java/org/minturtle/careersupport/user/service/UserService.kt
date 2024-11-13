@@ -49,12 +49,17 @@ class UserService(
             ?.takeIf { passwordEncoder.matchesAsync(password, it.password) }
             ?: throw UnAuthorizedException("Invalid credentials")
 
-        val jwt = jwtTokenProvider.sign(UserInfoDto.of(user), Date()).awaitSingle()
+        val jwt = CoroutineScope(Dispatchers.IO).async {
+            jwtTokenProvider.sign(UserInfoDto.of(user), Date())
+        }.await()
+
         return UserLoginResponse.of(user, jwt)
     }
 
     suspend fun getUserInfo(token: String): UserInfoResponse {
-        val verifiedUserInfo = jwtTokenProvider.verify(token).awaitSingle()
+        val verifiedUserInfo = CoroutineScope(Dispatchers.IO).async {
+            jwtTokenProvider.verify(token)
+        }.await()
 
         return UserInfoResponse.of(verifiedUserInfo)
     }
@@ -62,7 +67,9 @@ class UserService(
     suspend fun getUserApiAccessToken(id: String): UserApiAccessTokenResponse {
         val findUser = userRepository.findById(id).awaitSingle()
 
-        val token = apiTokenProvider.generate(UserInfoDto.of(findUser)).awaitSingle()
+        val token = CoroutineScope(Dispatchers.IO).async {
+            apiTokenProvider.generate(UserInfoDto.of(findUser))
+        }.await()
 
         findUser.apiToken = token
 
