@@ -11,6 +11,7 @@ import org.minturtle.careersupport.codereview.dto.CodeReviewRequest
 import org.minturtle.careersupport.codereview.dto.CodeReviewResponse
 import org.minturtle.careersupport.codereview.entity.CommitPinpoint
 import org.minturtle.careersupport.codereview.respository.ReviewPinpointRepository
+import org.minturtle.careersupport.codereview.utils.GithubObjectFactory
 import org.minturtle.careersupport.common.facade.GithubPullRequestFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,6 +23,7 @@ import org.springframework.util.StringUtils
 class GithubCodeReviewService(
     private val codeReviewClient: AiCodeReviewClient,
     @Autowired private val reviewPinpointRepository: ReviewPinpointRepository,
+    @Autowired private val githubObjectFactory: GithubObjectFactory,
     @Value("\${code-review.whitelist.extensions}") private val codeReviewWhiteList: List<String?>
 ) {
 
@@ -30,7 +32,11 @@ class GithubCodeReviewService(
         val repositoryName = codeReviewRequest.repositoryName
         val prNumber = codeReviewRequest.prNumber
 
-        val pullRequest = GithubPullRequestFacade.of(token, repositoryName, prNumber)
+        val pullRequest = githubObjectFactory.createFacade(
+            githubToken = token,
+            repositoryName = repositoryName,
+            prNumber = prNumber
+        )
 
         val reviews = getReviewResponseFromAi(prNumber, repositoryName, pullRequest)
 

@@ -35,7 +35,7 @@ class InterviewService(
     suspend fun getTemplatesByUserId(userId: String, page: Int, size: Int): List<InterviewTemplateResponse> {
         return interviewTemplateRepository
             .findByUserId(userId, PageRequest.of(page, size))
-            .map { interviewTemplate: InterviewTemplate? -> InterviewTemplateResponse.of(interviewTemplate) }
+            .map { interviewTemplate: InterviewTemplate -> InterviewTemplateResponse.of(interviewTemplate) }
             .collectList()
             .awaitFirstOrElse { listOf() }
     }
@@ -50,7 +50,7 @@ class InterviewService(
         val messages = getMessages(templateId, pageable, cursor)
 
         return messages
-            .map { interviewMessage: InterviewMessage? ->
+            .map { interviewMessage: InterviewMessage ->
                 InterviewMessageResponse.of(
                     interviewMessage
                 )
@@ -110,6 +110,6 @@ class InterviewService(
         }
 
         return interviewMessageRepository
-            .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId!!, cursor, pageable).collectList().awaitSingle()
+            .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable).collectList().awaitSingle()
     }
 }

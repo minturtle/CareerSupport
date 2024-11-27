@@ -16,7 +16,7 @@ import java.util.*
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}") secretKey: String,
-    @Value("\${jwt.access- Value -expire-time}") private val ACCESS_TOKEN_EXPIRE_TIME : Long
+    @Value("\${jwt.access-token-expire-time}") private val ACCESS_TOKEN_EXPIRE_TIME : Long
 ) {
 
     private val secretKey = Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8))
