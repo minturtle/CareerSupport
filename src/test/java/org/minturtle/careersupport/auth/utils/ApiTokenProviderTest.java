@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.minturtle.careersupport.common.exception.BadRequestException;
-import org.minturtle.careersupport.common.utils.ReactiveEncryptUtils;
 import org.minturtle.careersupport.user.dto.UserInfoDto;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
