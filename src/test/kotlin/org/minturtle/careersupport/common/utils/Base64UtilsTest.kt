@@ -41,11 +41,11 @@ class Base64UtilsTest {
 
         private val TEST_JS_CODE = """
             // This is a sample JavaScript file
-                            
+            
             function helloWorld() {
               console.log("Hello, World!");
             }
-                            
+            
             helloWorld();
         """.trimIndent()
 
