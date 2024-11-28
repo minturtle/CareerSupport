@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 
 
-@Logging
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}") secretKey: String,
@@ -38,7 +37,6 @@ class JwtTokenProvider(
      * @param : now : token을 생성하는 시간
      * @return : 엑세스 토큰 리턴
      */
-    @Logging
     fun sign(user: UserInfoDto, now: Date): String {
         val expiryDate = Date(now.time + ACCESS_TOKEN_EXPIRE_TIME)
 

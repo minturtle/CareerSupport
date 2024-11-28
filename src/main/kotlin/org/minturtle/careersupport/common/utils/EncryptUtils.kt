@@ -10,6 +10,11 @@ import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
+
+/**
+ * 문자열을 암호화/ 복호화 하는 함수입니다. Blocking I/O가 발생하므로 Webflux환경에선 주의가 필요합니다.
+ * @author minseok kim
+*/
 @Component
 class EncryptUtils(
     @Value("\${spring.encryption.key}") encryptionKey: String
@@ -36,26 +41,25 @@ class EncryptUtils(
 
     }
 
-    fun decrypt(encryptedData: String?): String {
-
+    fun decrypt(encryptedData: String): String {
         val decodedData = Base64.getDecoder().decode(encryptedData)
         val byteBuffer = ByteBuffer.wrap(decodedData)
-        val iv = ByteArray(GCM_IV_LENGTH)
 
+        // IV 읽어오기
+        val iv = ByteArray(GCM_IV_LENGTH)
+        byteBuffer.get(iv)
+
+        // 남은 데이터가 암호문
         val cipherText = ByteArray(byteBuffer.remaining())
-        byteBuffer[cipherText]
-        val cipher =
-            Cipher.getInstance(ALGORITHM)
-        val parameterSpec = GCMParameterSpec(
-            GCM_TAG_LENGTH * 8,
-            iv
-        )
+        byteBuffer.get(cipherText)
+
+        val cipher = Cipher.getInstance(ALGORITHM)
+        val parameterSpec = GCMParameterSpec(GCM_TAG_LENGTH * 8, iv)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec)
+
         val decryptedData = cipher.doFinal(cipherText)
         return String(decryptedData, StandardCharsets.UTF_8)
-
     }
-
     companion object {
         private const val GCM_IV_LENGTH = 12
         private const val GCM_TAG_LENGTH = 16

@@ -1,5 +1,6 @@
 package org.minturtle.careersupport.common.aop
 
+import com.mongodb.reactivestreams.client.ReactiveContextProvider
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.aspectj.lang.ProceedingJoinPoint
@@ -58,19 +59,8 @@ class LoggingAspect {
     }
 
     private fun proceedNormalObject(obj: Any, className: String, methodName: String, startTime: Instant): Any {
-        return mono {
-            val requestInfo = RequestInfo()
-            log.info("[{}] {}.{} started", requestInfo.requestId, className, methodName)
-
-            try {
-                obj.also {
-                    logCompletion(requestInfo, className, methodName, startTime, null)
-                }
-            } catch (err: Throwable) {
-                logCompletion(requestInfo, className, methodName, startTime, err)
-                throw err
-            }
-        }
+        //TODO: 로그 처리
+        return obj
     }
 
     private fun logCompletion(requestInfo: RequestInfo, className: String, methodName: String, start: Instant, error: Throwable?) {

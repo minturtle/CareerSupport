@@ -1,6 +1,5 @@
 package org.minturtle.careersupport.common.filter.logging
 
-import lombok.extern.slf4j.Slf4j
 import org.minturtle.careersupport.common.dto.RequestInfo
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered

@@ -4,7 +4,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import lombok.extern.slf4j.Slf4j
 import org.kohsuke.github.GHCommit
 import org.minturtle.careersupport.codereview.dto.CodeReviewFileInfo
 import org.minturtle.careersupport.codereview.dto.CodeReviewRequest
@@ -19,12 +18,11 @@ import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 
 @Service
-@Slf4j
 class GithubCodeReviewService(
     private val codeReviewClient: AiCodeReviewClient,
     @Autowired private val reviewPinpointRepository: ReviewPinpointRepository,
     @Autowired private val githubObjectFactory: GithubObjectFactory,
-    @Value("\${code-review.whitelist.extensions}") private val codeReviewWhiteList: List<String?>
+    @Value("\${code-review.whitelist.extensions}") private val codeReviewWhiteList: List<String>
 ) {
 
     suspend fun doCodeReview(codeReviewRequest: CodeReviewRequest): List<CodeReviewResponse> {

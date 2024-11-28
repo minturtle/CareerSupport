@@ -1,5 +1,8 @@
 package org.minturtle.careersupport.codereview.controller
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.kohsuke.github.GHCommit.File
@@ -26,14 +29,14 @@ import org.mockito.Mockito.verify
 import org.minturtle.careersupport.testutils.IntegrationTest
 
 class CodeReviewControllerTest : IntegrationTest() {
-    @MockBean
-    private lateinit var reviewPinpointRepository: ReviewPinpointRepository
 
     @Test
-    fun `Code Review에 필요한 Request Body를 코드리뷰를 요청할 수 있다`() = runTest {
+    fun `Code Review에 필요한 Request Body를 입력해 코드리뷰를 요청할 수 있다`() = runTest {
         // given
         val user = createUser()
+
         val apiToken = apiTokenProvider.generate(UserInfoDto.of(user))
+
         val ghpToken = "ghp_asdasdsaf21321"
         val repositoryName = "minturtle/careersupport"
         val prNumber = 1
@@ -41,12 +44,6 @@ class CodeReviewControllerTest : IntegrationTest() {
         val files = listOf(mock(File::class.java))
 
         val mockPrFacade = mock(GithubPullRequestFacade::class.java)
-        val pinpoint = CommitPinpoint(
-            lastSha = "sha",
-            prNumber = prNumber,
-            repositoryName = repositoryName
-        )
-
 
         given(githubObjectFactory.createFacade(ghpToken, repositoryName, prNumber))
             .willReturn(mockPrFacade)
@@ -59,11 +56,7 @@ class CodeReviewControllerTest : IntegrationTest() {
         given(files[0].status).willReturn("modified")
         given(files[0].patch).willReturn("122")
 
-        given(reviewPinpointRepository.findByPrNumberAndRepositoryName(anyInt(), anyString()))
-            .willReturn(Mono.empty())
-        given(reviewPinpointRepository.save(any())).willReturn(Mono.just(pinpoint))
-
-        given(chatService.generate(any(), any())).willReturn(Flux.just("AI", "댓글", "테스트"))
+        given(chatService.generate(anyString(), anyString(), any<List<String>>())).willReturn(Flux.just("AI", "댓글", "테스트"))
 
         val codeReviewRequestBody = CodeReviewRequest(
             githubToken = ghpToken,
