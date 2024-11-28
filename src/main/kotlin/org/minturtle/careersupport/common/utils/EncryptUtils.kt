@@ -1,5 +1,6 @@
 package org.minturtle.careersupport.common.utils
 
+import org.minturtle.careersupport.common.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.nio.ByteBuffer
@@ -41,7 +42,7 @@ class EncryptUtils(
 
     }
 
-    fun decrypt(encryptedData: String): String {
+    fun decrypt(encryptedData: String): String? {
         val decodedData = Base64.getDecoder().decode(encryptedData)
         val byteBuffer = ByteBuffer.wrap(decodedData)
 
@@ -57,8 +58,12 @@ class EncryptUtils(
         val parameterSpec = GCMParameterSpec(GCM_TAG_LENGTH * 8, iv)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec)
 
-        val decryptedData = cipher.doFinal(cipherText)
-        return String(decryptedData, StandardCharsets.UTF_8)
+        val decryptedData = runCatching{
+            cipher.doFinal(cipherText)
+        }.onFailure {
+            throw BadRequestException("암호문 복호화에 실패했습니다.")
+        }.getOrNull()
+        return decryptedData?.let { String(it, StandardCharsets.UTF_8) }
     }
     companion object {
         private const val GCM_IV_LENGTH = 12
