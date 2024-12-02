@@ -15,7 +15,6 @@ java {
 	}
 }
 
-apply plugin: 'kotlin-spring'
 
 jar {
 	enabled = false // 기본 jar 태스크를 비활성화하여 plain JAR 파일이 생성되지 않도록 설정
@@ -35,8 +34,9 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor'
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+	implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
@@ -53,9 +53,6 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
 
-	// TODO : Kotlin 마이그레이션 완료 후 Lombok은 제거되어야 합니다.
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
 
 	testImplementation 'io.projectreactor:reactor-test'
@@ -65,7 +62,11 @@ dependencies {
 	testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'io.mockk:mockk:1.13.13'
 
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+	testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
 }
@@ -88,4 +89,31 @@ tasks.named('test') {
 
 test {
 	jvmArgs '-XX:+AllowRedefinitionToAddDeleteMethods' // blockhound test용
+}
+
+sourceSets {
+	main {
+		kotlin {
+			srcDirs = ['src/main/kotlin']
+		}
+	}
+	test {
+		kotlin {
+			srcDirs = ['src/test/kotlin']
+		}
+	}
+}
+
+tasks.compileKotlin {
+	kotlinOptions {
+		jvmTarget = '17'
+		javaParameters = true
+	}
+}
+
+tasks.compileTestKotlin {
+	kotlinOptions {
+		jvmTarget = '17'
+		javaParameters = true
+	}
 }
