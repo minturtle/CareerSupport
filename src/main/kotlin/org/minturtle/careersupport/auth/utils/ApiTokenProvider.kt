@@ -2,7 +2,6 @@ package org.minturtle.careersupport.auth.utils
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.minturtle.careersupport.common.aop.Logging
 import org.minturtle.careersupport.common.exception.BadRequestException
 import org.minturtle.careersupport.common.exception.InternalServerException
 import org.minturtle.careersupport.common.utils.EncryptUtils
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component
 import java.nio.BufferUnderflowException
 
 
-@Logging
 @Component
 class ApiTokenProvider(
     private val encryptUtils: EncryptUtils,

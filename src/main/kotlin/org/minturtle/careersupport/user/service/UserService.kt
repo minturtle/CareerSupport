@@ -6,7 +6,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.reactor.awaitSingle
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider
-import org.minturtle.careersupport.common.aop.Logging
 import org.minturtle.careersupport.common.exception.ConflictException
 import org.minturtle.careersupport.common.exception.UnAuthorizedException
 import org.minturtle.careersupport.user.dto.*
@@ -18,7 +17,6 @@ import java.util.*
 
 
 @Service
-@Logging
 class UserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
