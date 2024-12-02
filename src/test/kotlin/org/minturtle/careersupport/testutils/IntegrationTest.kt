@@ -2,6 +2,9 @@ package org.minturtle.careersupport.testutils
 
 import de.bwaldvogel.mongo.MongoServer
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider
 import org.minturtle.careersupport.codereview.utils.GithubObjectFactory
@@ -51,15 +54,18 @@ abstract class IntegrationTest {
 
     protected val DEFAULT_USER_RAW_PASSWORD = "password"
 
-    protected fun createUser(username: String = "username", password: String = DEFAULT_USER_RAW_PASSWORD): User {
+    protected suspend fun createUser(username: String = "username", password: String = DEFAULT_USER_RAW_PASSWORD): User {
         val nickname = "nickname"
         return User(
             nickname,
             username,
-            passwordEncoder.encode(password),
+            encode(password),
             null
         )
     }
+
+    private suspend fun encode(password: String): String =
+        CoroutineScope(Dispatchers.IO).async { passwordEncoder.encode(password) }.await()
 
     protected fun createJwtToken(user: User): String {
         return jwtTokenProvider.sign(of(user), Date())
