@@ -1,5 +1,6 @@
 package org.minturtle.careersupport.common.controller
 
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.minturtle.careersupport.user.dto.UserInfoDto
 import reactor.test.StepVerifier
@@ -15,7 +16,7 @@ class CommonControllerTest : IntegrationTest() {
     }
 
     @Test
-    fun `API 토큰이 필요한 api에서 currentUser의 정보를 잘 가져올 수 있다`() {
+    fun `API 토큰이 필요한 api에서 currentUser의 정보를 잘 가져올 수 있다`() = runTest {
         // given
         val user = createUser()
         val apiToken = apiTokenProvider.generate(UserInfoDto.of(user))

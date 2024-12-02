@@ -1,8 +1,6 @@
 package org.minturtle.careersupport.codereview.service
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.kohsuke.github.GHCommit
 import org.minturtle.careersupport.codereview.dto.CodeReviewFileInfo
@@ -46,8 +44,10 @@ class GithubCodeReviewService(
         repositoryName: String,
         pullRequest: GithubPullRequestFacade
     ): List<CodeReviewResponse> = coroutineScope{
-        val commitPinpoint = reviewPinpointRepository.findByPrNumberAndRepositoryName(prNumber, repositoryName)
-            .awaitSingleOrNull()
+        val commitPinpoint = withContext(Dispatchers.IO) {
+            reviewPinpointRepository.findByPrNumberAndRepositoryName(prNumber, repositoryName)
+                .awaitSingleOrNull()
+        }
 
         // commitPinpoint가 없으면 모든 changedFile을, 있다면 마지막 커밋 이후의 changedFile을 가져옴
         val changedFiles = commitPinpoint?.let {

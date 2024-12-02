@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactor.awaitSingle
-import org.minturtle.careersupport.common.aop.Logging
 import org.minturtle.careersupport.common.service.ChatService
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 
 
-@Logging
 @Service
 class InterviewService(
     private val chatService: ChatService,

@@ -3,7 +3,6 @@ package org.minturtle.careersupport.auth.utils
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.minturtle.careersupport.common.aop.Logging
 import org.minturtle.careersupport.common.exception.InternalServerException
 import org.minturtle.careersupport.user.dto.UserInfoDto
 import org.springframework.beans.factory.annotation.Value

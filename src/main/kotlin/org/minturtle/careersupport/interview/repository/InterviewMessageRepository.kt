@@ -1,6 +1,5 @@
 package org.minturtle.careersupport.interview.repository
 
-import org.minturtle.careersupport.common.aop.Logging
 import org.minturtle.careersupport.interview.entity.InterviewMessage
 import org.minturtle.careersupport.interview.entity.InterviewMessage.SenderType
 import org.springframework.data.domain.Pageable
@@ -9,7 +8,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 
-@Logging
 interface InterviewMessageRepository : ReactiveMongoRepository<InterviewMessage, String> {
 
     fun findFirstByTemplateIdAndSenderOrderByCreatedAtDesc(
