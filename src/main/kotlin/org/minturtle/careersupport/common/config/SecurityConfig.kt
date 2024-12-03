@@ -4,6 +4,7 @@ import org.minturtle.careersupport.auth.filter.ApiTokenFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -36,6 +37,12 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authenticationManager(authenticationManager)
             .securityContextRepository(securityContextRepository)
+            .exceptionHandling {
+                it.authenticationEntryPoint { exchange, ex ->
+                    exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+                    exchange.response.setComplete()
+                }
+            }
             .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
                 exchanges
                     .pathMatchers("/api/users/register", "/api/users/login", "/api/health-check").permitAll()

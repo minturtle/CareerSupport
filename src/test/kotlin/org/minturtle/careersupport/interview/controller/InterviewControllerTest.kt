@@ -27,6 +27,8 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.minturtle.careersupport.testutils.IntegrationTest
 import org.mockito.ArgumentMatchers.*
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 class InterviewControllerTest : IntegrationTest() {
     @Autowired
@@ -77,7 +79,9 @@ class InterviewControllerTest : IntegrationTest() {
 
         // then
         assertThat(actual).containsExactlyInAnyOrderElementsOf(
-            givenInterviewTemplates.map { InterviewTemplateResponse.of(it) }
+            givenInterviewTemplates.map {
+                InterviewTemplateResponse(it.id, it.theme, it.createdAt.atZone(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS))
+            }
         )
     }
 

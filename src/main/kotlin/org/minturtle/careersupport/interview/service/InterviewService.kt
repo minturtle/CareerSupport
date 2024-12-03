@@ -1,9 +1,11 @@
 package org.minturtle.careersupport.interview.service
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.withContext
 import org.minturtle.careersupport.common.service.ChatService
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse
@@ -103,11 +105,15 @@ class InterviewService(
 
     private suspend fun getMessages(templateId: String, pageable: Pageable, cursor: String? = null): List<InterviewMessage> {
         if(cursor.isNullOrEmpty()){
-            return interviewMessageRepository
-                .findTopNByTemplateIdOrderByIdDesc(templateId, pageable).collectList().awaitSingle()
+            return withContext(Dispatchers.IO){
+                interviewMessageRepository
+                    .findTopNByTemplateIdOrderByIdDesc(templateId, pageable).collectList().awaitSingle()
+            }
         }
 
-        return interviewMessageRepository
-            .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable).collectList().awaitSingle()
+        return withContext(Dispatchers.IO){
+            interviewMessageRepository
+                .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable).collectList().awaitSingle()
+        }
     }
 }

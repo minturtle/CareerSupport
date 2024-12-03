@@ -91,7 +91,7 @@ class InterviewController(
     ): Flow<String> = coroutineScope {
 
         launch {
-            // 먼저 사용자의 메시지를 저장합니다.
+            // 비동기로 사용자의 메시지를 저장
             interviewService.saveMessage(
                 templateId = templateId,
                 sender = InterviewMessage.SenderType.USER,
@@ -104,6 +104,7 @@ class InterviewController(
         interviewService.getFollowQuestion(templateId, reqBody.answer)
             .onEach { followMessageBuilder.append(it) }
             .onCompletion {
+                // 완료시 AI의 꼬리질문도 저장
                 interviewService.saveMessage(
                     content = followMessageBuilder.toString(),
                     sender = InterviewMessage.SenderType.INTERVIEWER,
