@@ -26,12 +26,31 @@ class SecurityContextRepository(
      * @author minseok kim
     */
     override fun load(exchange: ServerWebExchange): Mono<SecurityContext> {
-        return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
-            .filter { authHeader -> authHeader.startsWith("Bearer ") }
-            .flatMap { authHeader ->
-                val authToken: String = authHeader.substring(7)
-                val auth: Authentication = UsernamePasswordAuthenticationToken(authToken, authToken)
+        return Mono.justOrEmpty(getAuthenticateToken(exchange))
+            .flatMap { (token, type) ->
+                val auth: Authentication = UsernamePasswordAuthenticationToken(token, type)
                 this.authenticationManager.authenticate(auth).map { SecurityContextImpl() }
             }
     }
+
+    private fun getAuthenticateToken(exchange: ServerWebExchange) : Pair<String, TokenType>?{
+        val jwt = exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION)
+
+        if(jwt?.startsWith("Bearer ") == true){
+            return jwt.substring(7) to TokenType.JWT
+        }
+
+        val apiToken = exchange.request.headers.getFirst("X-API-TOKEN")
+
+        if(apiToken?.startsWith("cs_") == true){
+            return apiToken.substring(3) to TokenType.API_TOKEN
+        }
+
+        return null
+    }
+
+    enum class TokenType{
+        JWT, API_TOKEN
+    }
+
 }
