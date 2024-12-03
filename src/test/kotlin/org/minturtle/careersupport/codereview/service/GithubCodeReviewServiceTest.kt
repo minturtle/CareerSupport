@@ -80,13 +80,13 @@ class GithubCodeReviewServiceTest {
             codeReviewClient.getAiCodeReview(any())
         } returns CodeReviewResponse("filename", "comment")
 
-        every {
+        coEvery {
             reviewPinpointRepository.findByPrNumberAndRepositoryName(any(), any())
-        } returns Mono.empty()
+        } returns null
 
-        every {
+        coEvery {
             reviewPinpointRepository.save(any())
-        } returns Mono.empty()
+        } returns mockk()
 
         // when
         val codeReviewResponse = githubCodeReviewService.doCodeReview(codeReviewRequest)

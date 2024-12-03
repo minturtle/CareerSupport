@@ -3,7 +3,6 @@ package org.minturtle.careersupport.user.service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.reactor.awaitSingle
 import org.minturtle.careersupport.auth.utils.ApiTokenProvider
 import org.minturtle.careersupport.auth.utils.JwtTokenProvider
 import org.minturtle.careersupport.common.exception.ConflictException
@@ -37,7 +36,7 @@ class UserService(
             encodedPassword
         )
 
-        val savedUser = userRepository.save(newUser).awaitSingle()
+        val savedUser = userRepository.save(newUser)
 
         return UserInfoDto.of(savedUser)
     }
@@ -63,7 +62,7 @@ class UserService(
     }
 
     suspend fun getUserApiAccessToken(id: String): UserApiAccessTokenResponse {
-        val findUser = userRepository.findById(id).awaitSingle()
+        val findUser = userRepository.findById(id) ?: UnAuthorizedException("사용자 정보를 조회할 수 없습니다.") as User
 
         val token = CoroutineScope(Dispatchers.IO).async {
             apiTokenProvider.generate(UserInfoDto.of(findUser))
@@ -71,7 +70,7 @@ class UserService(
 
         findUser.apiToken = token
 
-        userRepository.save(findUser).awaitSingle()
+        userRepository.save(findUser)
         return UserApiAccessTokenResponse(token)
     }
 

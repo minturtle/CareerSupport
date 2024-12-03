@@ -44,10 +44,7 @@ class GithubCodeReviewService(
         repositoryName: String,
         pullRequest: GithubPullRequestFacade
     ): List<CodeReviewResponse> = coroutineScope{
-        val commitPinpoint = withContext(Dispatchers.IO) {
-            reviewPinpointRepository.findByPrNumberAndRepositoryName(prNumber, repositoryName)
-                .awaitSingleOrNull()
-        }
+        val commitPinpoint = reviewPinpointRepository.findByPrNumberAndRepositoryName(prNumber, repositoryName)
 
         // commitPinpoint가 없으면 모든 changedFile을, 있다면 마지막 커밋 이후의 changedFile을 가져옴
         val changedFiles = commitPinpoint?.let {
@@ -68,7 +65,7 @@ class GithubCodeReviewService(
 
     }
 
-    private fun ReviewPinpointRepository.persist(
+    private suspend fun ReviewPinpointRepository.persist(
         prNumber: Int,
         repositoryName: String,
         files: List<GHCommit.File>,
@@ -85,10 +82,10 @@ class GithubCodeReviewService(
      * @param existingPinpoint 기존의 CommitPinpoint
      * @param files            새로운 파일 리스트
      */
-    private fun updatePinPoint(existingPinpoint: CommitPinpoint, files: List<GHCommit.File>){
+    private suspend fun updatePinPoint(existingPinpoint: CommitPinpoint, files: List<GHCommit.File>){
         val newSha = files[files.size - 1].sha
         existingPinpoint.lastSha = newSha
-        reviewPinpointRepository.save(existingPinpoint).subscribe()
+        reviewPinpointRepository.save(existingPinpoint)
     }
 
     /**
@@ -97,14 +94,14 @@ class GithubCodeReviewService(
      * @param prNumber PR 번호
      * @param files    파일 리스트
      */
-    private fun savePinPoint(prNumber: Int, repositoryName: String, files: List<GHCommit.File>) {
+    private suspend fun savePinPoint(prNumber: Int, repositoryName: String, files: List<GHCommit.File>) {
         val lastCommitSha = files[files.size - 1].sha
         val commitPinpoint = CommitPinpoint(
             lastSha = lastCommitSha,
             prNumber = prNumber,
             repositoryName = repositoryName
         )
-        reviewPinpointRepository.save(commitPinpoint).subscribe()
+        reviewPinpointRepository.save(commitPinpoint)
     }
 
     private fun filterWhiteList(file: GHCommit.File): Boolean {

@@ -1,11 +1,10 @@
 package org.minturtle.careersupport.codereview.respository
 
 import org.minturtle.careersupport.codereview.entity.CommitPinpoint
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository
-import reactor.core.publisher.Mono
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
-interface ReviewPinpointRepository : ReactiveMongoRepository<CommitPinpoint, String> {
+interface ReviewPinpointRepository : CoroutineCrudRepository<CommitPinpoint, String> {
 
-    fun findByPrNumberAndRepositoryName(prNumber: Int?, repositoryName: String?): Mono<CommitPinpoint?>
+    suspend fun findByPrNumberAndRepositoryName(prNumber: Int, repositoryName: String): CommitPinpoint?
 
 }

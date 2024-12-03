@@ -2,10 +2,12 @@ package org.minturtle.careersupport.interview.service
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
+import org.minturtle.careersupport.common.exception.BadRequestException
 import org.minturtle.careersupport.common.service.ChatService
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse
@@ -35,9 +37,8 @@ class InterviewService(
     suspend fun getTemplatesByUserId(userId: String, page: Int, size: Int): List<InterviewTemplateResponse> {
         return interviewTemplateRepository
             .findByUserId(userId, PageRequest.of(page, size))
+            .toList()
             .map { interviewTemplate: InterviewTemplate -> InterviewTemplateResponse.of(interviewTemplate) }
-            .collectList()
-            .awaitFirstOrElse { listOf() }
     }
 
     suspend fun getMessagesByTemplateIdWithMessageIdCursor(
@@ -65,14 +66,14 @@ class InterviewService(
             theme = theme
         )
 
-        val savedTemplate = interviewTemplateRepository.save(interviewTemplate).awaitSingle()
+        val savedTemplate = interviewTemplateRepository.save(interviewTemplate)
 
          return savedTemplate.let { CreateInterviewTemplateResponse.of(it) }
     }
 
 
     suspend fun getInterviewQuestion(templateId: String): Flow<String> {
-        val template = interviewTemplateRepository.findById(templateId).awaitSingle()
+        val template = interviewTemplateRepository.findById(templateId) ?: throw BadRequestException("면접 정보를 조회할 수 없습니다.")
 
         return chatService.generate(interviewSystemMessage, template.theme).asFlow()
     }
@@ -81,7 +82,8 @@ class InterviewService(
         val lastInteviewerMessage = interviewMessageRepository.findFirstByTemplateIdAndSenderOrderByCreatedAtDesc(
             templateId,
             SenderType.INTERVIEWER
-        ).awaitSingle()!!
+        )?: throw BadRequestException("먼저 면접을 시작해 주세요.")
+
 
         return chatService.generate(
             followSystemMessage,
@@ -98,22 +100,18 @@ class InterviewService(
             content = content
         )
 
-        interviewMessageRepository.save(message).awaitSingle()
+        interviewMessageRepository.save(message)
     }
 
 
 
     private suspend fun getMessages(templateId: String, pageable: Pageable, cursor: String? = null): List<InterviewMessage> {
         if(cursor.isNullOrEmpty()){
-            return withContext(Dispatchers.IO){
-                interviewMessageRepository
-                    .findTopNByTemplateIdOrderByIdDesc(templateId, pageable).collectList().awaitSingle()
-            }
+            return interviewMessageRepository
+                .findTopNByTemplateIdOrderByIdDesc(templateId, pageable).toList()
         }
 
-        return withContext(Dispatchers.IO){
-            interviewMessageRepository
-                .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable).collectList().awaitSingle()
-        }
+        return  interviewMessageRepository
+            .findByTemplateIdAndIdLessThanEqualOrderByIdDesc(templateId, cursor, pageable).toList()
     }
 }

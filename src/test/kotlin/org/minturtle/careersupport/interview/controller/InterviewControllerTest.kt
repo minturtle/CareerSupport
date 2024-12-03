@@ -1,6 +1,7 @@
 package org.minturtle.careersupport.interview.controller
 
-import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -41,10 +42,10 @@ class InterviewControllerTest : IntegrationTest() {
     private lateinit var interviewMessageRepository: InterviewMessageRepository
 
     @BeforeEach
-    fun setUp() {
-        userRepository.deleteAll().block()
-        interviewTemplateRepository.deleteAll().block()
-        interviewMessageRepository.deleteAll().block()
+    fun setUp() = runTest{
+        userRepository.deleteAll()
+        interviewTemplateRepository.deleteAll()
+        interviewMessageRepository.deleteAll()
     }
 
     @Test
@@ -56,8 +57,8 @@ class InterviewControllerTest : IntegrationTest() {
             InterviewTemplate(userId = user.id, theme = "theme2")
         )
 
-        userRepository.save(user).awaitSingle()
-        interviewTemplateRepository.saveAll(givenInterviewTemplates).awaitLast()
+        userRepository.save(user)
+        interviewTemplateRepository.saveAll(givenInterviewTemplates)
 
         // when
         val jwtToken = createJwtToken(user)
@@ -115,9 +116,9 @@ class InterviewControllerTest : IntegrationTest() {
 
         )
 
-        userRepository.save(user).awaitSingle()
-        interviewTemplateRepository.save(interviewTemplate).awaitSingle()
-        interviewMessages.forEach { interviewMessageRepository.save(it).awaitSingle() }
+        userRepository.save(user)
+        interviewTemplateRepository.save(interviewTemplate)
+        interviewMessages.forEach { interviewMessageRepository.save(it) }
 
         // when
         val jwtToken = createJwtToken(user)
@@ -149,7 +150,7 @@ class InterviewControllerTest : IntegrationTest() {
         // given
         val theme = "Java Programming"
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when
         val jwtToken = createJwtToken(user)
@@ -168,7 +169,7 @@ class InterviewControllerTest : IntegrationTest() {
             .returnResult().responseBody!!
 
         // then
-        val savedInterviewTemplate = interviewTemplateRepository.findById(actual.interviewId).awaitSingle()!!
+        val savedInterviewTemplate = interviewTemplateRepository.findById(actual.interviewId)!!
 
         assertThat(savedInterviewTemplate.userId).isEqualTo(user.id)
         assertThat(savedInterviewTemplate.theme).isEqualTo(theme)
@@ -188,8 +189,8 @@ class InterviewControllerTest : IntegrationTest() {
         given(chatService.generate(anyString(), anyString(), any<List<String>>()))
             .willReturn(mockQuestions)
 
-        userRepository.save(user).awaitSingle()
-        interviewTemplateRepository.save(interviewTemplate).awaitSingle()
+        userRepository.save(user)
+        interviewTemplateRepository.save(interviewTemplate)
 
         // when
         val jwtToken = createJwtToken(user)
@@ -213,11 +214,10 @@ class InterviewControllerTest : IntegrationTest() {
         verify(chatService, times(1))
             .generate(anyString(), eq(theme))
 
-        StepVerifier.create(interviewMessageRepository.findAll())
-            .assertNext { message ->
-                assertThat(message.content).isEqualTo("질문:당신의 이름은?")
-            }
-            .verifyComplete()
+        val messages = interviewMessageRepository.findAll().toList()
+
+        assertThat(messages).hasSize(1)
+        assertThat(messages[0].content).isEqualTo("질문:당신의 이름은?")
     }
 
     @Test
@@ -238,9 +238,9 @@ class InterviewControllerTest : IntegrationTest() {
             content = "prevQuestionContent"
         )
 
-        userRepository.save(user).awaitSingle()
-        interviewTemplateRepository.save(interviewTemplate).awaitSingle()
-        interviewMessageRepository.save(prevQuestion).awaitSingle()
+        userRepository.save(user)
+        interviewTemplateRepository.save(interviewTemplate)
+        interviewMessageRepository.save(prevQuestion)
 
         given(chatService.generate(anyString(), anyString(), eq(listOf(prevQuestionContent))))
             .willReturn(mockFollowQuestions)
@@ -271,11 +271,10 @@ class InterviewControllerTest : IntegrationTest() {
         verify(chatService, times(1))
             .generate(anyString(), eq(userAnswer), eq(listOf(prevQuestionContent)))
 
-        StepVerifier.create(interviewMessageRepository.findAll()
-            .filter { m -> m.sender == InterviewMessage.SenderType.USER })
-            .assertNext { message ->
-                assertThat(message.content).isEqualTo("제 이름은 김민석 입니다.")
-            }
-            .verifyComplete()
+        val userMessages =
+            interviewMessageRepository.findAll().filter { m -> m.sender == InterviewMessage.SenderType.USER }.toList()
+
+        assertThat(userMessages).hasSize(1)
+        assertThat(userMessages[0].content).isEqualTo("제 이름은 김민석 입니다.")
     }
 }

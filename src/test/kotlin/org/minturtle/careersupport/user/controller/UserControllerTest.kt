@@ -24,8 +24,8 @@ class UserControllerTest : IntegrationTest() {
     private lateinit var userRepository: UserRepository
 
     @BeforeEach
-    fun setUp() {
-        userRepository.deleteAll().block()
+    fun setUp() = runTest{
+        userRepository.deleteAll()
     }
 
     @Test
@@ -57,7 +57,7 @@ class UserControllerTest : IntegrationTest() {
     fun `사용자는 이미 회원가입 된 username을 입력할 시 409 코드를 반환받는다`() = runTest{
         // given
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         val request = UserRegistrationRequest(
             user.nickname,
@@ -78,7 +78,7 @@ class UserControllerTest : IntegrationTest() {
     fun `회원가입이 완료된 사용자는 로그인을 수행해 JWT 토큰을 반환받을 수 있다`()= runTest{
         // given
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when
         val request = UserLoginRequest(user.username, DEFAULT_USER_RAW_PASSWORD)
@@ -107,7 +107,7 @@ class UserControllerTest : IntegrationTest() {
     ) = runTest{
         // given
         val user = createUser(correctUsername, correctPassword)
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when & then
         val request = UserLoginRequest(inputUsername, inputPassword)
@@ -123,7 +123,7 @@ class UserControllerTest : IntegrationTest() {
     fun `JWT 토큰을 가진 사용자는 자신의 토큰으로 자신의 정보를 조회할 수 있다`() = runTest{
         // given
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when
         val jwtToken = createJwtToken(user)
@@ -144,7 +144,7 @@ class UserControllerTest : IntegrationTest() {
     fun `만료된 JWT를 전달한 사용자는 401 오류를 throw한다`() = runTest {
         // given
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when & then
         val expiredToken = createExpiredToken(user)
@@ -160,7 +160,7 @@ class UserControllerTest : IntegrationTest() {
     fun `사용자는 API AccessToken을 발급 받을 수 있다`() = runTest{
         // given
         val user = createUser()
-        userRepository.save(user).awaitSingle()
+        userRepository.save(user)
 
         // when
         val jwtToken = createJwtToken(user)
@@ -174,12 +174,8 @@ class UserControllerTest : IntegrationTest() {
             .responseBody!!
 
         // then
-        StepVerifier.create(userRepository.findById(user.id))
-            .assertNext { savedUser ->
-                assertThat(savedUser.apiToken).isEqualTo(responseBody.token)
-            }
-            .verifyComplete()
-
+        val savedUser = userRepository.findById(user.id)!!
+        assertThat(savedUser.apiToken).isEqualTo(responseBody.token)
 
         val decryptedUserInfo = apiTokenProvider.decryptApiToken(responseBody.token)
 

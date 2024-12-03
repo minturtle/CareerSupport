@@ -1,7 +1,9 @@
 package org.minturtle.careersupport.codereview.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.withContext
 import org.minturtle.careersupport.codereview.dto.CodeReviewFileInfo
 import org.minturtle.careersupport.codereview.dto.CodeReviewResponse
 import org.minturtle.careersupport.common.service.ChatService
@@ -18,9 +20,12 @@ class AiCodeReviewClient(
 ){
 
     suspend fun getAiCodeReview(file: CodeReviewFileInfo): CodeReviewResponse {
-        val reviewContent = chatService.generate(codeReviewSystemMessage, objectMapper.writeValueAsString(file))
-            .collect(Collectors.joining())
-            .awaitSingle()
+        val reviewContent = withContext(Dispatchers.IO){
+            chatService.generate(codeReviewSystemMessage, objectMapper.writeValueAsString(file))
+                .collect(Collectors.joining())
+                .awaitSingle()
+        }
+
 
         return CodeReviewResponse(file.fileName, reviewContent)
     }
