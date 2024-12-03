@@ -17,7 +17,8 @@ class SecurityContextRepository(
 ) : ServerSecurityContextRepository {
 
     override fun save(exchange: ServerWebExchange, context: SecurityContext): Mono<Void> {
-        throw UnsupportedOperationException("Not supported yet.")
+        // jwt는 저장할 필요 없음.
+        return Mono.empty()
     }
 
     /**
@@ -29,7 +30,7 @@ class SecurityContextRepository(
         return Mono.justOrEmpty(getAuthenticateToken(exchange))
             .flatMap { (token, type) ->
                 val auth: Authentication = UsernamePasswordAuthenticationToken(token, type)
-                this.authenticationManager.authenticate(auth).map { SecurityContextImpl() }
+                this.authenticationManager.authenticate(auth).map { SecurityContextImpl(it) }
             }
     }
 
@@ -43,7 +44,7 @@ class SecurityContextRepository(
         val apiToken = exchange.request.headers.getFirst("X-API-TOKEN")
 
         if(apiToken?.startsWith("cs_") == true){
-            return apiToken.substring(3) to TokenType.API_TOKEN
+            return apiToken to TokenType.API_TOKEN
         }
 
         return null

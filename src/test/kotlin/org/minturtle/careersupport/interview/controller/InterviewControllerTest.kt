@@ -22,12 +22,11 @@ import org.minturtle.careersupport.interview.entity.InterviewMessage
 import org.minturtle.careersupport.interview.entity.InterviewTemplate
 import org.minturtle.careersupport.interview.repository.InterviewMessageRepository
 import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.minturtle.careersupport.testutils.IntegrationTest
+import org.mockito.ArgumentMatchers.*
 
 class InterviewControllerTest : IntegrationTest() {
     @Autowired
@@ -182,7 +181,7 @@ class InterviewControllerTest : IntegrationTest() {
         val user = createUser()
         val interviewTemplate = InterviewTemplate(userId = user.id, theme = theme)
 
-        given(chatService.generate(anyString(), eq(theme)))
+        given(chatService.generate(anyString(), anyString(), any<List<String>>()))
             .willReturn(mockQuestions)
 
         userRepository.save(user).awaitSingle()

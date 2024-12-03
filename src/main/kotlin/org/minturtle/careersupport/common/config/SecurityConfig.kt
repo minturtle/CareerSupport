@@ -30,11 +30,12 @@ class SecurityConfig {
     fun securityFilterChain(
         http: ServerHttpSecurity,
         authenticationManager: ReactiveAuthenticationManager,
-        securityContextRepository: ServerSecurityContextRepository,
-        apiTokenFilter: ApiTokenFilter?
+        securityContextRepository: ServerSecurityContextRepository
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
+            .authenticationManager(authenticationManager)
+            .securityContextRepository(securityContextRepository)
             .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
                 exchanges
                     .pathMatchers("/api/users/register", "/api/users/login", "/api/health-check").permitAll()
@@ -61,7 +62,6 @@ class SecurityConfig {
             }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
-            .addFilterAt(apiTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build()
     }
 }

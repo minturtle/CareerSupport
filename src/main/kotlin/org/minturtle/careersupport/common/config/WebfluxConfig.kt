@@ -7,8 +7,10 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 
 
 @Configuration
-class WebFluxConfig : WebFluxConfigurer {
-    private val userInfoArgumentResolver: UserInfoArgumentResolver? = null
+class WebFluxConfig(
+    private val userInfoArgumentResolver: UserInfoArgumentResolver
+) : WebFluxConfigurer {
+
     override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
         configurer.addCustomResolver(userInfoArgumentResolver)
     }

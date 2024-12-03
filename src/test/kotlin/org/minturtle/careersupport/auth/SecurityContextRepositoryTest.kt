@@ -66,7 +66,7 @@ class SecurityContextRepositoryTest{
 
         StepVerifier.create(securityContextRepository.load(exchange))
             .assertNext {
-                verify(exactly = 1) { authenticationManager.authenticate(UsernamePasswordAuthenticationToken(apiToken.substring(3), SecurityContextRepository.TokenType.API_TOKEN)) }
+                verify(exactly = 1) { authenticationManager.authenticate(UsernamePasswordAuthenticationToken(apiToken, SecurityContextRepository.TokenType.API_TOKEN)) }
             }
             .verifyComplete()
     }

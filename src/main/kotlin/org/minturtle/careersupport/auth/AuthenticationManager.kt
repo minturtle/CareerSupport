@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 
 
 @Component
@@ -20,13 +21,15 @@ class AuthenticationManager(
         val tokenType = authentication.credentials as SecurityContextRepository.TokenType
 
         if(tokenType == SecurityContextRepository.TokenType.JWT){
-            return Mono.just(jwtTokenProvider.verify(authToken))
+            return Mono.fromCallable { jwtTokenProvider.verify(authToken) }
+                .subscribeOn(Schedulers.boundedElastic())
                 .map {
                     UsernamePasswordAuthenticationToken(it, null, null)
                 }
         }
 
-        return Mono.just(apiTokenProvider.decryptApiToken(authToken))
+        return Mono.fromCallable { apiTokenProvider.decryptApiToken(authToken) }
+            .subscribeOn(Schedulers.boundedElastic())
             .map {  UsernamePasswordAuthenticationToken(it, null, null) }
 
     }
