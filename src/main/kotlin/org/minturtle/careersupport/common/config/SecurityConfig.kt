@@ -1,16 +1,17 @@
 package org.minturtle.careersupport.common.config
 
 import org.minturtle.careersupport.auth.filter.ApiTokenFilter
-import org.minturtle.careersupport.auth.filter.JwtAuthenticationFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.context.ServerSecurityContextRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.server.ServerWebExchange
 import java.util.*
@@ -28,7 +29,8 @@ class SecurityConfig {
     @Throws(Exception::class)
     fun securityFilterChain(
         http: ServerHttpSecurity,
-        jwtAuthenticationFilter: JwtAuthenticationFilter?,
+        authenticationManager: ReactiveAuthenticationManager,
+        securityContextRepository: ServerSecurityContextRepository,
         apiTokenFilter: ApiTokenFilter?
     ): SecurityWebFilterChain {
         return http
@@ -59,7 +61,6 @@ class SecurityConfig {
             }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
-            .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterAt(apiTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build()
     }
