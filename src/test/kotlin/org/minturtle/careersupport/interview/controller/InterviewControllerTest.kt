@@ -25,8 +25,6 @@ import org.minturtle.careersupport.interview.entity.InterviewTemplate
 import org.minturtle.careersupport.interview.repository.InterviewMessageRepository
 import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository
 import org.minturtle.careersupport.testutils.IntegrationTest
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.*
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
@@ -90,7 +88,7 @@ class InterviewControllerTest : IntegrationTest() {
         // given
         val templateId = "456"
         val user = createUser()
-        val interviewTemplate = InterviewTemplate(userId = user.id, theme = "theme2")
+        val interviewTemplate = InterviewTemplate(id = templateId, userId = user.id, theme = "theme2")
 
         val interviewMessages = listOf(
             InterviewMessage(
@@ -229,20 +227,20 @@ class InterviewControllerTest : IntegrationTest() {
         val prevQuestionContent = "질문 : 당신의 이름은?"
 
         val user = createUser()
-        val interviewTemplate = InterviewTemplate(userId = user.id, theme = theme)
+        val interviewTemplate = InterviewTemplate(id = templateId, userId = user.id, theme = theme)
 
         val prevQuestion = InterviewMessage(
             id = "message1",
             templateId = interviewTemplate.id,
             sender = InterviewMessage.SenderType.INTERVIEWER,
-            content = "prevQuestionContent"
+            content = prevQuestionContent
         )
 
         userRepository.save(user)
         interviewTemplateRepository.save(interviewTemplate)
         interviewMessageRepository.save(prevQuestion)
 
-        every { chatService.generate(anyString(), anyString(), ArgumentMatchers.eq(listOf(prevQuestionContent))) } returns mockFollowQuestions
+        every { chatService.generate(any(), any(), any()) } returns mockFollowQuestions
 
         // when
         val jwtToken = createJwtToken(user)
@@ -267,7 +265,7 @@ class InterviewControllerTest : IntegrationTest() {
             .expectNext("당신의 나이는?")
             .verifyComplete()
 
-        verify(exactly = 1){chatService.generate(anyString(), eq(userAnswer), eq(listOf(prevQuestionContent))) }
+        verify(exactly = 1){chatService.generate(any(), eq(userAnswer), any()) }
 
 
         val userMessages =

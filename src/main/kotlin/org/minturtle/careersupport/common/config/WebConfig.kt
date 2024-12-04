@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.web.client.RestClient
 
 
@@ -17,6 +18,7 @@ class WebConfig {
     }
 
     @Bean
+    @Primary
     fun objectMapper() : ObjectMapper{
         return jacksonObjectMapper()
             .registerModule(JavaTimeModule())
