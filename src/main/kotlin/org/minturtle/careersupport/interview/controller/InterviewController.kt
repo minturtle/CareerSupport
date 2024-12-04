@@ -3,6 +3,8 @@ package org.minturtle.careersupport.interview.controller
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
 import org.minturtle.careersupport.common.dto.CursoredResponse
 import org.minturtle.careersupport.interview.dto.CreateInterviewTemplateResponse
 import org.minturtle.careersupport.interview.dto.InterviewMessageResponse
@@ -14,6 +16,7 @@ import org.minturtle.careersupport.user.dto.UserInfoDto
 import org.minturtle.careersupport.user.resolvers.annotations.CurrentUser
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 
 
 @RestController
@@ -58,30 +61,14 @@ class InterviewController(
     @PostMapping(value = ["/start/{templateId}"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     suspend fun startAIInterview(
         @PathVariable templateId: String
-    ): Flow<String> = coroutineScope {
-        val interviewMessageFlow = interviewService.getInterviewQuestion(templateId)
-            .shareIn(
-                scope = this,
-                started = SharingStarted.Eagerly,
-                replay = 0
-            )
+    ): Flux<String> = coroutineScope {
+        val sb = StringBuilder()
 
-        launch {
-            val fullMessage = interviewMessageFlow
-                .fold(StringBuilder()) { acc, chunk ->
-                    acc.append(chunk)
-                }
-                .toString()
-
-            interviewService.saveMessage(
-                content = fullMessage,
-                templateId = templateId,
-                sender = InterviewMessage.SenderType.INTERVIEWER
-            )
-        }
-
-        // 클라이언트로의 스트리밍
-        interviewMessageFlow
+        interviewService.getInterviewQuestion(templateId)
+            .asFlow()
+            .onEach { sb.append(it) }
+            .onCompletion { interviewService.saveMessage(templateId, InterviewMessage.SenderType.INTERVIEWER, sb.toString()) }
+            .asFlux()
     }
 
     @PostMapping(value = ["/answer/{templateId}"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
@@ -97,7 +84,7 @@ class InterviewController(
                 sender = InterviewMessage.SenderType.USER,
                 content =  reqBody.answer
             )
-        }
+        }.start()
 
         val followMessageBuilder = StringBuilder()
 

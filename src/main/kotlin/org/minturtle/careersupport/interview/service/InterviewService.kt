@@ -72,10 +72,10 @@ class InterviewService(
     }
 
 
-    suspend fun getInterviewQuestion(templateId: String): Flow<String> {
+    suspend fun getInterviewQuestion(templateId: String): Flux<String> {
         val template = interviewTemplateRepository.findById(templateId) ?: throw BadRequestException("면접 정보를 조회할 수 없습니다.")
 
-        return chatService.generate(interviewSystemMessage, template.theme).asFlow()
+        return chatService.generate(interviewSystemMessage, template.theme)
     }
 
     suspend fun getFollowQuestion(templateId: String, answer: String): Flow<String> {

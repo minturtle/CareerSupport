@@ -26,7 +26,7 @@ class GlobalControllerAdvice {
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleUnExpectedException(e: Exception): GlobalErrorResponse<String> {
-        log.warn("UNEXPECTED EXCEPTION THROWS : ${e.javaClass.simpleName} ${e.stackTrace}" )
+        log.warn("UNEXPECTED EXCEPTION THROWS : ${e.javaClass.simpleName} ${e.message} ${e.localizedMessage}" )
         return GlobalErrorResponse(e.message)
     }
 }

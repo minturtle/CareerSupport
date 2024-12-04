@@ -1,8 +1,9 @@
 package org.minturtle.careersupport.interview.controller
 
+import io.mockk.every
+import io.mockk.verify
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,10 +24,8 @@ import org.minturtle.careersupport.interview.entity.InterviewMessage
 import org.minturtle.careersupport.interview.entity.InterviewTemplate
 import org.minturtle.careersupport.interview.repository.InterviewMessageRepository
 import org.minturtle.careersupport.interview.repository.InterviewTemplateRepository
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.minturtle.careersupport.testutils.IntegrationTest
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.*
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -58,7 +57,7 @@ class InterviewControllerTest : IntegrationTest() {
         )
 
         userRepository.save(user)
-        interviewTemplateRepository.saveAll(givenInterviewTemplates)
+        interviewTemplateRepository.saveAll(givenInterviewTemplates).collect{}
 
         // when
         val jwtToken = createJwtToken(user)
@@ -118,7 +117,7 @@ class InterviewControllerTest : IntegrationTest() {
 
         userRepository.save(user)
         interviewTemplateRepository.save(interviewTemplate)
-        interviewMessages.forEach { interviewMessageRepository.save(it) }
+        interviewMessageRepository.saveAll(interviewMessages).collect{}
 
         // when
         val jwtToken = createJwtToken(user)
@@ -184,10 +183,11 @@ class InterviewControllerTest : IntegrationTest() {
         val mockQuestions = Flux.just("질문", ":", "당신의 이름은?")
 
         val user = createUser()
-        val interviewTemplate = InterviewTemplate(userId = user.id, theme = theme)
+        val interviewTemplate = InterviewTemplate(id = templateId, userId = user.id, theme = theme)
 
-        given(chatService.generate(anyString(), anyString(), any<List<String>>()))
-            .willReturn(mockQuestions)
+        every {
+            chatService.generate(any(), eq("Java Programming"), any())
+        } returns mockQuestions
 
         userRepository.save(user)
         interviewTemplateRepository.save(interviewTemplate)
@@ -211,9 +211,9 @@ class InterviewControllerTest : IntegrationTest() {
             .expectNext("당신의 이름은?")
             .verifyComplete()
 
-        verify(chatService, times(1))
-            .generate(anyString(), eq(theme))
-
+        verify(exactly = 1) {
+            chatService.generate(any(), eq("Java Programming"), any())
+        }
         val messages = interviewMessageRepository.findAll().toList()
 
         assertThat(messages).hasSize(1)
@@ -242,8 +242,7 @@ class InterviewControllerTest : IntegrationTest() {
         interviewTemplateRepository.save(interviewTemplate)
         interviewMessageRepository.save(prevQuestion)
 
-        given(chatService.generate(anyString(), anyString(), eq(listOf(prevQuestionContent))))
-            .willReturn(mockFollowQuestions)
+        every { chatService.generate(anyString(), anyString(), ArgumentMatchers.eq(listOf(prevQuestionContent))) } returns mockFollowQuestions
 
         // when
         val jwtToken = createJwtToken(user)
@@ -268,8 +267,8 @@ class InterviewControllerTest : IntegrationTest() {
             .expectNext("당신의 나이는?")
             .verifyComplete()
 
-        verify(chatService, times(1))
-            .generate(anyString(), eq(userAnswer), eq(listOf(prevQuestionContent)))
+        verify(exactly = 1){chatService.generate(anyString(), eq(userAnswer), eq(listOf(prevQuestionContent))) }
+
 
         val userMessages =
             interviewMessageRepository.findAll().filter { m -> m.sender == InterviewMessage.SenderType.USER }.toList()

@@ -1,5 +1,6 @@
 package org.minturtle.careersupport.testutils
 
+import com.ninjasquad.springmockk.MockkBean
 import de.bwaldvogel.mongo.MongoServer
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend
 import kotlinx.coroutines.CoroutineScope
@@ -46,10 +47,10 @@ abstract class IntegrationTest {
     @Autowired
     protected lateinit var apiTokenProvider: ApiTokenProvider
 
-    @MockBean
+    @MockkBean
     protected lateinit var chatService: ChatService
 
-    @MockBean
+    @MockkBean
     protected lateinit var githubObjectFactory: GithubObjectFactory
 
     protected val DEFAULT_USER_RAW_PASSWORD = "password"
